@@ -19,6 +19,7 @@ import org.springframework.security.oauth2.core.user.OAuth2User;
 
 import com.vStock.config.filter.JWTAuthenticationFilter;
 import com.vStock.config.filter.JWTLoginFilter;
+import com.vStock.service.impl.UsersDetailServiceImpl;
 
 //繼承 WebSecurityConfigurerAdapter才可自訂登入邏輯
 @Configuration
@@ -26,7 +27,7 @@ import com.vStock.config.filter.JWTLoginFilter;
 public class SecurityConfig extends WebSecurityConfigurerAdapter{
 	
 	@Autowired
-	private UserDetailsService service;
+	private UsersDetailServiceImpl service;
 
 //	@Autowired
 //	private CorsFilter corsFilter;
@@ -35,7 +36,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter{
 		try {
 			http
 			.authorizeRequests()
-			.antMatchers("/login","/checkLogin","/oauth2/authorization/google")
+			.antMatchers("/login","/checkLogin","/oauth2/authorization/google","/register")
 			.permitAll()
 			.antMatchers("/css/**/**","/images/**/**","/js/**","/default/**","/layout/**","/img/**","/Message/**")
 			.permitAll()
@@ -120,7 +121,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter{
     @Bean
     public OidcUserService oidcUserService() {
     	OidcUserService service = new OidcUserService();
-    	service.setOauth2UserService(new com.vStock.service.impl.MyOidcUserService());
+    	service.setOauth2UserService(new com.vStock.service.impl.MyOidcUserServiceImpl());
     	return service;
     }
 

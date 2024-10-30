@@ -29,11 +29,11 @@ import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.client.UnknownContentTypeException;
 
-public class MyOidcUserService implements OAuth2UserService<OAuth2UserRequest, OAuth2User> {
+public class MyOidcUserServiceImpl implements OAuth2UserService<OAuth2UserRequest, OAuth2User> {
 	private static final String MISSING_USER_INFO_URI_ERROR_CODE = "missing_user_info_uri";
 	private static final String INVALID_USER_INFO_RESPONSE_ERROR_CODE = "invalid_user_info_response";	
 	private Converter<OAuth2UserRequest, RequestEntity<?>> requestEntityConverter = new OAuth2UserRequestEntityConverter();
-	public MyOidcUserService() {
+	public MyOidcUserServiceImpl() {
 		
 	}
 	@Override

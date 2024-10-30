@@ -16,14 +16,20 @@ import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.Size;
 
 import org.hibernate.annotations.ColumnDefault;
+import org.hibernate.annotations.DynamicInsert;
+import org.hibernate.annotations.DynamicUpdate;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.validation.annotation.Validated;
 
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
+@NoArgsConstructor
 @Entity
 @Table(name = "normal_user")
+@DynamicInsert
+@DynamicUpdate
 @Validated
 public class NormalUser {
 	
@@ -34,24 +40,24 @@ public class NormalUser {
 	
 	@NotEmpty
 	@Size(min=8, max=30)
-	@Column(name = "username",unique = true,columnDefinition = "VARCHAR(30)",nullable = false)
+	@Column(name = "username",unique = true,columnDefinition = "NVARCHAR(30)",nullable = false)
 	private String username;
 	
 	@NotEmpty
 	@Size(min=8, max=200)
-	@Column(name = "password",columnDefinition = "VARCHAR(200)",nullable = false)
+	@Column(name = "password",columnDefinition = "NVARCHAR(200)",nullable = false)
 	private String password;
 	
-	@Column(name = "role",columnDefinition = "VARCHAR(30)")
-	@ColumnDefault(value = "'ROLE_NORMAL'")
-	private String role;
+	@Column(name = "user_role",columnDefinition = "NVARCHAR(30) DEFAULT 'NORMAL'")
+//	@ColumnDefault(value = "'NORMAL'")
+	private String userRole;
 	
-	@Column(name = "email",columnDefinition = "VARCHAR(200)",nullable = false)
+	@Column(name = "email",columnDefinition = "NVARCHAR(200)",nullable = false)
 	@Size(min=8, max=200)
 	private String email;
 	
-	@Column(name = "phone",columnDefinition = "VARCHAR(50)")
-	@ColumnDefault(value = "0917648234")
+	@Column(name = "phone",columnDefinition = "NVARCHAR(50)")
+	@ColumnDefault(value = "'0917648234'")
 	private String phone;
 	
 	@Column(name = "enabled",columnDefinition = "BIT")
@@ -74,29 +80,26 @@ public class NormalUser {
 	@Column(name = "disabled_date",columnDefinition = "DATE",nullable = true)
 	private Date disabledDate;
 	
-	@Column(name = "remark",columnDefinition = "VARCHAR(200)",nullable = true)
+	@Column(name = "remark",columnDefinition = "NVARCHAR(200)",nullable = true)
 	private String remark;
 	
-	@Column(name = "user_disabled_detail_id",nullable = true)
-	private int userDisabledDetailId;
-	
-	@OneToMany(fetch = FetchType.LAZY,
-			mappedBy = "id",
+	@OneToMany(fetch = FetchType.EAGER,
+			mappedBy = "fkUserId",
 			cascade = CascadeType.ALL)
 	private List<UserDisabledDetail> userDisabledDetailList;
 	
 	
 	
-	private NormalUser(int id, @NotEmpty @Size(min = 8, max = 30) String username,
-			@NotEmpty @Size(min = 8, max = 200) String password, String role,
+	public NormalUser(int id, @NotEmpty @Size(min = 8, max = 30) String username,
+			@NotEmpty @Size(min = 8, max = 200) String password, String userRole,
 			@NotEmpty @Size(min = 8, max = 200) String email, String phone, boolean enabled, Date lastLoginDate,
-			Date registerDate, Date enabledDate, Date disabledDate, String remark, int userDisabledDetailId,
+			Date registerDate, Date enabledDate, Date disabledDate, String remark,
 			List<UserDisabledDetail> userDisabledDetailList) {
 		super();
 		this.id = id;
 		this.username = username;
 		this.password = password;
-		this.role = role;
+		this.userRole = userRole;
 		this.email = email;
 		this.phone = phone;
 		this.enabled = enabled;
@@ -105,7 +108,6 @@ public class NormalUser {
 		this.enabledDate = enabledDate;
 		this.disabledDate = disabledDate;
 		this.remark = remark;
-		this.userDisabledDetailId = userDisabledDetailId;
 		this.userDisabledDetailList = userDisabledDetailList;
 	}
 
@@ -115,7 +117,7 @@ public class NormalUser {
 		private int id;
         private String username;
         private String password;
-        private String role;
+        private String userRole;
         private String email;
         private String phone;
         private boolean enabled;
@@ -124,7 +126,6 @@ public class NormalUser {
         private Date enabledDate;
         private Date disabledDate;
         private String remark;
-        private int userDisabledDetailId;
         private List<UserDisabledDetail> userDisabledDetailList = null;
         
 		public NormalUserBuilder setId(int id) {
@@ -142,8 +143,8 @@ public class NormalUser {
             return this;
         }
         
-        public NormalUserBuilder setRole(String role) {
-            this.role = role;
+        public NormalUserBuilder setRole(String userRole) {
+            this.userRole = userRole;
             return this;
         }
         
@@ -187,18 +188,13 @@ public class NormalUser {
             return this;
         }
         
-        public NormalUserBuilder setUserDisabledDetailId(int userDisabledDetailId) {
-            this.userDisabledDetailId = userDisabledDetailId;
-            return this;
-        }
-        
         public NormalUserBuilder setUserDisabledDetailList(List<UserDisabledDetail> userDisabledDetailList) {
             this.userDisabledDetailList = userDisabledDetailList;
             return this;
         }
         
         public NormalUser build() {
-            return new NormalUser(this.id, this.username, this.password, this.role, this.email, this.phone, this.enabled, this.lastLoginDate, this.registerDate, this.enabledDate, this.disabledDate, this.remark, this.userDisabledDetailId, this.userDisabledDetailList);
+            return new NormalUser(this.id, this.username, this.password, this.userRole, this.email, this.phone, this.enabled, this.lastLoginDate, this.registerDate, this.enabledDate, this.disabledDate, this.remark, this.userDisabledDetailList);
         }
 	}
 	
