@@ -11,6 +11,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -18,13 +19,22 @@ import javax.activation.DataSource;
 import javax.activation.FileDataSource;
 import javax.mail.MessagingException;
 
+import com.vStock.dao.NormalUserDao;
 import com.vStock.service.JavaMailService;
 
 @SpringBootTest
 public class MailTest {
 	
+    @Value("${urlPrefix}")
+    private String urlPrefix;
+    
+    @Value("spring.mail.username")
+    private String emailAddress;
 //	@Mock
 //	private JavaMailSender mailSender;
+	
+	@Autowired
+	private NormalUserDao normalUserdao;
 	
 	@Autowired
 	@InjectMocks
@@ -38,11 +48,11 @@ public class MailTest {
 	@Test
 	public void testSendMail() {
 		System.out.println("開始測試送信");
-	    String[] receivers = {"sam.tian@frog-jump.com"};
+	    String[] receivers = {emailAddress};
 	    String subject = "[註冊成功] 請點擊信件連結以啟用帳號";
 	    String htmlContent = "<h1>您已成功註冊 Stock Market Simulation!</h1>"
 	            + "<p>請點擊以下連結以啟用帳號:</p>"
-	            + "<a href=\"http://localhost:8080/activate?token\">啟用帳號</a>";
+	            + "<a href="+urlPrefix+"enableUser/?username="+normalUserdao.findById(1).get().getUsername()+">啟用帳號</a>";
 
 	    try {
 	    	javaMailService.sendMail(Arrays.asList(receivers), subject, htmlContent);

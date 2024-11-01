@@ -2,6 +2,7 @@ package com.vStock.service.impl;
 
 import java.sql.Date;
 import java.util.Arrays;
+import java.util.Optional;
 
 import javax.mail.MessagingException;
 import javax.servlet.http.HttpServletRequest;
@@ -10,8 +11,9 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -24,6 +26,9 @@ import com.vStock.service.NormalUserService;
 public class NormalUserServiceImpl implements NormalUserService{
 	
 	private final static Logger logger = LogManager.getLogger(NormalUserServiceImpl.class);
+	
+    @Value("${urlPrefix}")
+    private String urlPrefix;
 	
 	@Autowired
 	private NormalUserDao normalUserDao;
@@ -55,7 +60,7 @@ public class NormalUserServiceImpl implements NormalUserService{
 		    String subject = "[註冊成功] 請點擊信件連結以啟用帳號";
 		    String htmlContent = "<h1>您已成功註冊 Stock Market Simulation!</h1>"
 		            + "<p>請點擊以下連結以啟用帳號:</p>"
-		            + "<a href=\"http://localhost:8080/activate?token\">啟用帳號</a>";
+		            + "<a href="+urlPrefix+"enableUser/?username="+username+"\">啟用帳號</a>";
 			mailService.sendMail(Arrays.asList(receivers), subject, htmlContent);
 		}catch(MessagingException me) {
 			logger.error(me.getCause());
@@ -64,5 +69,24 @@ public class NormalUserServiceImpl implements NormalUserService{
 			logger.error(e.getCause());
 			throw new RuntimeException(e);
 		}
+	}
+
+	@Transactional
+	public void enableUser(String username, HttpServletRequest req, HttpServletResponse res) {
+		Optional<NormalUser> user = null;
+		if ((user = normalUserDao.findByUsername(username)).isPresent()) {
+			if (user.get().isEnabled()) {
+				throw new RuntimeException("此帳號已啟用");
+			}
+			user.get().setEnabled(true);
+			try {
+				normalUserDao.save(user.get());
+			}catch(Exception e) {
+				logger.error(e.getCause());
+			}
+		}else {
+			throw new UsernameNotFoundException("查無此使用者帳號");
+		}
+		
 	}
 }

@@ -66,7 +66,7 @@ public class RegistrationControllerTest {
                 .param("password", "password")
                 .param("email", "sam.tian@frog-jump.com"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.message").value("註冊成功"))
+                .andExpect(jsonPath("$.message").value("註冊成功，請至信箱查看確認信件以啟用帳號"))
                 .andExpect(jsonPath("$.status").value("success"));
     }
 
@@ -81,7 +81,7 @@ public class RegistrationControllerTest {
                 .param("password", "password2")
                 .param("email", "sam.tian@frog-jump.com"))
                 .andExpect(status().isInternalServerError())
-                .andExpect(jsonPath("$.message").value("Simulated error"))
+                .andExpect(jsonPath("$.message").value("註冊失敗，請稍後再試"))
                 .andExpect(jsonPath("$.status").value("error"));
     }
 }

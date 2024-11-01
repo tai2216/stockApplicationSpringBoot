@@ -12,7 +12,9 @@ import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.vStock.dao.NormalUserDao;
 import com.vStock.dao.UserDisabledDetailDao;
@@ -21,8 +23,12 @@ import com.vStock.model.UserDisabledDetail;
 
 @SpringBootTest
 @TestMethodOrder(value = OrderAnnotation.class)
+//@Transactional
 class StockMarketSimulationApplicationTests {
-
+	
+    @Value("${urlPrefix}")
+    private String urlPrefix;
+    
 	@Autowired
 	private NormalUserDao normalUserdao;
 	
