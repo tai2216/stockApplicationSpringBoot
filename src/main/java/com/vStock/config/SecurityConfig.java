@@ -10,12 +10,7 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.oauth2.client.oidc.userinfo.OidcUserRequest;
 import org.springframework.security.oauth2.client.oidc.userinfo.OidcUserService;
-import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
-import org.springframework.security.oauth2.client.userinfo.OAuth2UserService;
-import org.springframework.security.oauth2.core.oidc.user.OidcUser;
-import org.springframework.security.oauth2.core.user.OAuth2User;
 
 import com.vStock.config.filter.JWTAuthenticationFilter;
 import com.vStock.config.filter.JWTLoginFilter;
@@ -26,8 +21,11 @@ import com.vStock.service.impl.UsersDetailServiceImpl;
 @EnableWebSecurity
 public class SecurityConfig extends WebSecurityConfigurerAdapter{
 	
+//	@Autowired
+//	private UsersDetailServiceImpl service;
+	
 	@Autowired
-	private UsersDetailServiceImpl service;
+	private UserDetailsService service;
 
 //	@Autowired
 //	private CorsFilter corsFilter;
@@ -40,18 +38,18 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter{
 			.permitAll()
 			.antMatchers("/css/**/**","/images/**/**","/js/**","/default/**","/layout/**","/img/**","/Message/**")
 			.permitAll()
-//			.anyRequest()
-//			.authenticated()
-//			.and()
-//			.sessionManagement()
-//			.sessionCreationPolicy(SessionCreationPolicy.STATELESS)//若這段啟用則會導致google第三方登入無法記錄使用者
+			.anyRequest()
+			.authenticated()
 			.and()
-//			.addFilter(new JWTLoginFilter(authenticationManager()))
-//			.addFilter(new JWTAuthenticationFilter(authenticationManager()))
+			.sessionManagement()
+			.sessionCreationPolicy(SessionCreationPolicy.STATELESS)//若這段啟用則會導致google第三方登入無法記錄使用者
+			.and()
+			.addFilter(new JWTLoginFilter(authenticationManager()))
+			.addFilter(new JWTAuthenticationFilter(authenticationManager()))
 			.csrf().disable()
 			.formLogin()
 			.disable()
-			.oauth2Login()
+//			.oauth2Login()
 //				.loginPage("/oauth2/authorization/google")
 //				.successHandler((req,res,auth)->{
 //					OAuth2User user = (OAuth2User) auth.getPrincipal();
@@ -61,10 +59,10 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter{
 //						});
 //						user.getAuthorities().forEach(System.out::println);
 //				})
-				.userInfoEndpoint()
-				.oidcUserService(oidcUserService())
-			.and()
-				.defaultSuccessUrl("/home",true)
+//				.userInfoEndpoint()
+//				.oidcUserService(oidcUserService())
+//			.and()
+//				.defaultSuccessUrl("/home",true)
 //			.and()	
 //		        .logout()
 //	            .logoutUrl("/logout")
@@ -118,11 +116,11 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter{
 		return new BCryptPasswordEncoder();
 	}
 	
-    @Bean
-    public OidcUserService oidcUserService() {
-    	OidcUserService service = new OidcUserService();
-    	service.setOauth2UserService(new com.vStock.service.impl.MyOidcUserServiceImpl());
-    	return service;
-    }
+//    @Bean
+//    public OidcUserService oidcUserService() {
+//    	OidcUserService service = new OidcUserService();
+//    	service.setOauth2UserService(new com.vStock.service.impl.MyOidcUserServiceImpl());
+//    	return service;
+//    }
 
 }

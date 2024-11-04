@@ -2,6 +2,8 @@ package com.vStock.config;
 
 import java.util.Collections;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -17,6 +19,8 @@ import org.springframework.web.filter.CorsFilter;
 @Configuration
 public class CorsConfig {
 	
+	private static final Logger logger = LogManager.getLogger(CorsConfig.class);
+	
 	@Bean
 	public FilterRegistrationBean<CorsFilter>  corsFilter() {
 		CorsConfiguration corsConfiguration = new CorsConfiguration();
@@ -30,8 +34,7 @@ public class CorsConfig {
 		CorsFilter corsFilter = new CorsFilter(source);
 		FilterRegistrationBean<CorsFilter> filterRegistrationBean = new FilterRegistrationBean<>(corsFilter);
 		filterRegistrationBean.setOrder(-101);// 小於 SpringSecurity Filter的 Order(-100)
-		
-		System.out.println("經過CORS CONFIG");
+		logger.info("經過CORS CONFIG");
 		return filterRegistrationBean ;
 	}	
 		

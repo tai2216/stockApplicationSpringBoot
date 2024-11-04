@@ -7,6 +7,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import javax.servlet.http.HttpServletRequestWrapper;
+
 import org.junit.jupiter.api.MethodOrderer.OrderAnnotation;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
@@ -20,6 +22,7 @@ import com.vStock.dao.NormalUserDao;
 import com.vStock.dao.UserDisabledDetailDao;
 import com.vStock.model.NormalUser;
 import com.vStock.model.UserDisabledDetail;
+import com.vStock.service.NormalUserService;
 
 @SpringBootTest
 @TestMethodOrder(value = OrderAnnotation.class)

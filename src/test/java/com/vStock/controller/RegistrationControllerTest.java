@@ -2,6 +2,7 @@ package com.vStock.controller;
 
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 
@@ -56,21 +57,6 @@ public class RegistrationControllerTest {
     }
 
     @Test
-    @Order(2)
-    public void testRegisterUser_Success() throws Exception {
-    	System.out.println("執行成功案例");
-        doNothing().when(normalUserService).registerUser(any(HttpServletRequest.class), any(HttpServletResponse.class));
-        
-        mockMvc.perform(post("/register")
-                .param("username", "testuser")
-                .param("password", "password")
-                .param("email", "sam.tian@frog-jump.com"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.message").value("註冊成功，請至信箱查看確認信件以啟用帳號"))
-                .andExpect(jsonPath("$.status").value("success"));
-    }
-
-    @Test
     @Order(1)
     public void testRegisterUser_Failure() throws Exception {
     	System.out.println("執行失敗案例");
@@ -84,4 +70,44 @@ public class RegistrationControllerTest {
                 .andExpect(jsonPath("$.message").value("註冊失敗，請稍後再試"))
                 .andExpect(jsonPath("$.status").value("error"));
     }
+    
+
+    @Test
+    @Order(2)
+    public void testRegisterUser_Success() throws Exception {
+    	System.out.println("執行成功案例");
+        doNothing().when(normalUserService).registerUser(any(HttpServletRequest.class), any(HttpServletResponse.class));
+        
+        mockMvc.perform(post("/register")
+                .param("username", "testuser")
+                .param("password", "password")
+                .param("email", "sam.tian@frog-jump.com"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.message").value("註冊成功，請至信箱查看確認信件以啟用帳號"))
+                .andExpect(jsonPath("$.status").value("success"));
+    }
+    
+    @Test
+    @Order(3)
+	public void testEnableUser_Failure() throws Exception {
+		System.out.println("執行失敗案例");
+		doThrow(new RuntimeException("Simulated error")).when(normalUserService).enableUser(anyString(),
+				any(HttpServletRequest.class), any(HttpServletResponse.class));
+
+		mockMvc.perform(get("/enableUser").param("username", "testuser2")).andExpect(status().is(500))
+				.andExpect(jsonPath("$.message").value("啟用失敗，請稍後再試")).andExpect(jsonPath("$.status").value("error"));
+	}
+    
+    @Test
+    @Order(4)
+	public void testEnableUser_Success() throws Exception {
+		System.out.println("執行成功案例");
+		doNothing().when(normalUserService).enableUser(anyString(), any(HttpServletRequest.class),
+				any(HttpServletResponse.class));
+
+		mockMvc.perform(get("/enableUser").param("username", "testuser")).andExpect(status().isOk())
+				.andExpect(jsonPath("$.message").value("啟用成功，請使用此帳號登入")).andExpect(jsonPath("$.status").value("success"));
+	}
+    
+    
 }
