@@ -34,7 +34,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter{
 		try {
 			http
 			.authorizeRequests()
-			.antMatchers("/login","/checkLogin","/oauth2/authorization/google","/register")
+			.antMatchers("/login","/checkLogin","/oauth2/authorization/google","/register","/enableUser")
 			.permitAll()
 			.antMatchers("/css/**/**","/images/**/**","/js/**","/default/**","/layout/**","/img/**","/Message/**")
 			.permitAll()

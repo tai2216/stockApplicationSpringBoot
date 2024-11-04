@@ -48,7 +48,7 @@ public class NormalUserServiceImpl implements NormalUserService{
 			if (normalUserDao.findByEmail(email).isPresent()) {
 				throw new RuntimeException("此信箱已被註冊");
 			}
-			NormalUser user = new NormalUser.NormalUserBuilder()
+			NormalUser user = NormalUser.builder()
 					.setUsername(username)
 					.setPassword(password)
 					.setEmail(email)
@@ -60,7 +60,7 @@ public class NormalUserServiceImpl implements NormalUserService{
 		    String subject = "[註冊成功] 請點擊信件連結以啟用帳號";
 		    String htmlContent = "<h1>您已成功註冊 Stock Market Simulation!</h1>"
 		            + "<p>請點擊以下連結以啟用帳號:</p>"
-		            + "<a href="+urlPrefix+"enableUser/?username="+username+"\">啟用帳號</a>";
+		            + "<a href="+urlPrefix+"enableUser/?username="+username+">啟用帳號</a>";
 			mailService.sendMail(Arrays.asList(receivers), subject, htmlContent);
 		}catch(MessagingException me) {
 			logger.error(me.getCause());

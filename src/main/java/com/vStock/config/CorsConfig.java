@@ -34,7 +34,7 @@ public class CorsConfig {
 		CorsFilter corsFilter = new CorsFilter(source);
 		FilterRegistrationBean<CorsFilter> filterRegistrationBean = new FilterRegistrationBean<>(corsFilter);
 		filterRegistrationBean.setOrder(-101);// 小於 SpringSecurity Filter的 Order(-100)
-		logger.info("經過CORS CONFIG");
+		logger.debug("經過CORS CONFIG");
 		return filterRegistrationBean ;
 	}	
 		

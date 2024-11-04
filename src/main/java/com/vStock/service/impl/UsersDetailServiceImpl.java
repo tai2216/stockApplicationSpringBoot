@@ -25,10 +25,10 @@ public class UsersDetailServiceImpl implements UserDetailsService {
 
 	@Override
 	public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-		logger.info("loadUserByUsername(username): "+username);
+		logger.debug("loadUserByUsername(username): "+username);
 		//查詢使用者帳戶是否存在
 		Optional<NormalUser> userInfo = normalUserdao.findByUsername(username);
-		logger.info("這個是userinfo: "+userInfo.orElseThrow(()->new UsernameNotFoundException("查無使用者")));
+		logger.debug("這個是userinfo: "+userInfo.orElseThrow(()->new UsernameNotFoundException("查無使用者")));
 		return User.builder()
 					.username(username)
 					.password(userInfo.get().getPassword())

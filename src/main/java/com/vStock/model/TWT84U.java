@@ -24,7 +24,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Builder
 @Entity
-@Table(name = "twt84u")
+@Table(name = "TWT84U")
 @DynamicInsert
 @DynamicUpdate
 public class TWT84U {
@@ -45,39 +45,39 @@ public class TWT84U {
 	private String name;
 	
 	@JsonProperty("TodayLimitUp")
-	@Column(name = "todayLimitUp",columnDefinition = "varchar(10)")
+	@Column(name = "today_limit_up",columnDefinition = "varchar(10)")
 	private String todayLimitUp;
 	
 	@JsonProperty("TodayOpeningRefPrice")
-	@Column(name = "todayOpeningRefPrice",columnDefinition = "varchar(10)")
+	@Column(name = "today_opening_ref_price",columnDefinition = "varchar(10)")
 	private String todayOpeningRefPrice;
 	
 	@JsonProperty("TodayLimitDown")
-	@Column(name = "todayLimitDown",columnDefinition = "varchar(10)")
+	@Column(name = "today_limit_down",columnDefinition = "varchar(10)")
 	private String todayLimitDown;
 	
 	@JsonProperty("PreviousDayOpeningRefPrice")
-	@Column(name = "previousDayOpeningRefPrice",columnDefinition = "varchar(10)")
+	@Column(name = "previous_day_opening_ref_price",columnDefinition = "varchar(10)")
 	private String previousDayOpeningRefPrice;
 	
 	@JsonProperty("PreviousDayPrice")
-	@Column(name = "previousDayPrice",columnDefinition = "varchar(10)")
+	@Column(name = "previous_day_price",columnDefinition = "varchar(10)")
 	private String previousDayPrice;
 	
 	@JsonProperty("PreviousDayLimitUp")
-	@Column(name = "previousDayLimitUp",columnDefinition = "varchar(10)")
+	@Column(name = "previous_day_limit_up",columnDefinition = "varchar(10)")
 	private String previousDayLimitUp;
 	
 	@JsonProperty("PreviousDayLimitDown")
-	@Column(name = "previousDayLimitDown",columnDefinition = "varchar(10)")
+	@Column(name = "previous_day_limit_down",columnDefinition = "varchar(10)")
 	private String previousDayLimitDown;
 	
 	@JsonProperty("LastTradingDay")
-	@Column(name = "lastTradingDay",columnDefinition = "varchar(7)")
+	@Column(name = "last_trading_day",columnDefinition = "varchar(7)")
 	private String lastTradingDay;
 	
 	@JsonProperty("AllowOddLotTrade")
-	@Column(name = "allowOddLotTrade",columnDefinition = "varchar(5)")
+	@Column(name = "allow_odd_lot_trade",columnDefinition = "varchar(5)")
 	private String allowOddLotTrade;
 	
 

@@ -18,6 +18,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -28,44 +29,48 @@ import com.vStock.dao.NormalUserDao;
 import com.vStock.service.JavaMailService;
 import com.vStock.service.impl.NormalUserServiceImpl;
 
-@SpringBootTest(classes={RegistrationController.class})
-//@WebMvcTest(RegistrationController.class)
+//@SpringBootTest(classes={RegistrationController.class})
+@SpringBootTest
+@AutoConfigureMockMvc
 @TestMethodOrder(value = OrderAnnotation.class)
 public class RegistrationControllerTest {
 
-//    @Autowired
+    @Autowired
     private MockMvc mockMvc;
     
     @Autowired
     private RegistrationController registrationController;
 
-    @MockBean
+//    @MockBean
+    @Autowired
     private NormalUserServiceImpl normalUserService;
     
-    @MockBean
+//    @MockBean
+    @Autowired
     private NormalUserDao normalUserDao;
     
-    @MockBean
+//    @MockBean
+    @Autowired
     private JavaMailService mailService;
 
-    @BeforeEach
-    public void setup() {
-        this.mockMvc = MockMvcBuilders.standaloneSetup(this.registrationController)
-                .setControllerAdvice(new Exception())
-                .build();
-//        MockitoAnnotations.openMocks(this);
-    }
+//    @BeforeEach
+//    public void setup() {
+//        this.mockMvc = MockMvcBuilders.standaloneSetup(this.registrationController)
+//                .setControllerAdvice(new Exception())
+//                .build();
+////        MockitoAnnotations.openMocks(this);
+//    }
 
     @Test
     @Order(1)
     public void testRegisterUser_Failure() throws Exception {
     	System.out.println("執行失敗案例");
-        doThrow(new RuntimeException("Simulated error")).when(normalUserService).registerUser(any(HttpServletRequest.class), any(HttpServletResponse.class));
+//        doThrow(new RuntimeException("Simulated error")).when(normalUserService).registerUser(any(HttpServletRequest.class), any(HttpServletResponse.class));
 
         mockMvc.perform(post("/register")
                 .param("username", "testuser2")
                 .param("password", "password2")
-                .param("email", "sam.tian@frog-jump.com"))
+                .param("email", "1234"))
                 .andExpect(status().isInternalServerError())
                 .andExpect(jsonPath("$.message").value("註冊失敗，請稍後再試"))
                 .andExpect(jsonPath("$.status").value("error"));
@@ -76,7 +81,7 @@ public class RegistrationControllerTest {
     @Order(2)
     public void testRegisterUser_Success() throws Exception {
     	System.out.println("執行成功案例");
-        doNothing().when(normalUserService).registerUser(any(HttpServletRequest.class), any(HttpServletResponse.class));
+//        doNothing().when(normalUserService).registerUser(any(HttpServletRequest.class), any(HttpServletResponse.class));
         
         mockMvc.perform(post("/register")
                 .param("username", "testuser")
@@ -91,8 +96,8 @@ public class RegistrationControllerTest {
     @Order(3)
 	public void testEnableUser_Failure() throws Exception {
 		System.out.println("執行失敗案例");
-		doThrow(new RuntimeException("Simulated error")).when(normalUserService).enableUser(anyString(),
-				any(HttpServletRequest.class), any(HttpServletResponse.class));
+//		doThrow(new RuntimeException("Simulated error")).when(normalUserService).enableUser(anyString(),
+//				any(HttpServletRequest.class), any(HttpServletResponse.class));
 
 		mockMvc.perform(get("/enableUser").param("username", "testuser2")).andExpect(status().is(500))
 				.andExpect(jsonPath("$.message").value("啟用失敗，請稍後再試")).andExpect(jsonPath("$.status").value("error"));
@@ -102,8 +107,8 @@ public class RegistrationControllerTest {
     @Order(4)
 	public void testEnableUser_Success() throws Exception {
 		System.out.println("執行成功案例");
-		doNothing().when(normalUserService).enableUser(anyString(), any(HttpServletRequest.class),
-				any(HttpServletResponse.class));
+//		doNothing().when(normalUserService).enableUser(anyString(), any(HttpServletRequest.class),
+//				any(HttpServletResponse.class));
 
 		mockMvc.perform(get("/enableUser").param("username", "testuser")).andExpect(status().isOk())
 				.andExpect(jsonPath("$.message").value("啟用成功，請使用此帳號登入")).andExpect(jsonPath("$.status").value("success"));

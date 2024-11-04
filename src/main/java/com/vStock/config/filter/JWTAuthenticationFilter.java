@@ -35,19 +35,19 @@ public class JWTAuthenticationFilter extends BasicAuthenticationFilter{
 			return;
 		}
 		String header = request.getHeader("Authorization");
-		logger.info("JWTAuth Header: "+header);
+		logger.debug("JWTAuth Header: "+header);
 		UsernamePasswordAuthenticationToken authentication = getAuthentication(request);
-		logger.info("After authentication: " + authentication);
+		logger.debug("After authentication: " + authentication);
 		SecurityContextHolder.getContext().setAuthentication(authentication);
-		logger.info("After setAuthentication");
-		logger.info("xxxxxxxxxxxxxxxxxxxxxxxxxxxx");
+		logger.debug("After setAuthentication");
+		logger.debug("xxxxxxxxxxxxxxxxxxxxxxxxxxxx");
 		chain.doFilter(request, response);
 		 
 	}
 	private UsernamePasswordAuthenticationToken getAuthentication(HttpServletRequest request) {
 		String token = request.getHeader("Authorization");
 		if (token != null) {
-			logger.info("JWTAuthenticationFilter: Token != null : "+token);
+			logger.debug("JWTAuthenticationFilter: Token != null : "+token);
 			// parse the token.
 			String user = Jwts.parser()
 							.setSigningKey("MyJwtSecret")
@@ -55,7 +55,7 @@ public class JWTAuthenticationFilter extends BasicAuthenticationFilter{
 							.getBody()
 							.getSubject();
 			if (user != null) {
-				logger.info("user!= null"+user.toString());
+				logger.debug("user!= null"+user.toString());
 				return new UsernamePasswordAuthenticationToken(user, null, new ArrayList<>());
 			}else{
 				logger.error("JWTAuthenticationFilter:未找到該使用者");

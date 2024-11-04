@@ -2,7 +2,6 @@ package com.vStock.model;
 
 import java.sql.Date;
 
-import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -12,7 +11,6 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
-import org.hibernate.annotations.ColumnDefault;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import lombok.AllArgsConstructor;
@@ -25,38 +23,38 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor(access = lombok.AccessLevel.PUBLIC)
 @Builder(access = lombok.AccessLevel.PUBLIC,setterPrefix = "set")
 @Entity
-@Table(name = "user_disabled_detail")
+@Table(name = "USER_DISABLED_DETAIL")
 public class UserDisabledDetail {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	@Column(name = "user_disabled_detail_id"
+	@Column(name = "USER_DISABLED_DETAIL_ID"
 			,nullable = false
 			,unique = false)
 	private int id;
 	
-	@Column(name = "fk_user_id")
+	@Column(name = "FK_USER_ID")
 	private int fkUserId;
 	
-	@Column(name = "disabled_reason")
+	@Column(name = "DISABLED_REASON")
 	private String disabledReason;
 	
 	@DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-	@Column(name = "disabled_date")
+	@Column(name = "DISABLED_DATE")
 	private Date disabledDate;
 	
-	@Column(name = "error_log")
+	@Column(name = "ERROR_LOG")
 	private String errorLog;
 	
-	@Column(name = "enabled_reason")
+	@Column(name = "ENABLED_REASON")
 	private String enabledReason;
 	
 	@DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-	@Column(name = "enabled_date")
+	@Column(name = "ENABLED_DATE")
 	private Date enabledDate;
 	
 	@ManyToOne(targetEntity = NormalUser.class
 			,optional = true)
-	@JoinColumn(name = "fk_user_id")
+	@JoinColumn(name = "FK_USER_ID")
 	private int getNormalUserId() {return this.fkUserId;};
 }

@@ -7,8 +7,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-import javax.servlet.http.HttpServletRequestWrapper;
-
 import org.junit.jupiter.api.MethodOrderer.OrderAnnotation;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
@@ -16,13 +14,11 @@ import org.junit.jupiter.api.TestMethodOrder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.transaction.annotation.Transactional;
 
 import com.vStock.dao.NormalUserDao;
 import com.vStock.dao.UserDisabledDetailDao;
 import com.vStock.model.NormalUser;
 import com.vStock.model.UserDisabledDetail;
-import com.vStock.service.NormalUserService;
 
 @SpringBootTest
 @TestMethodOrder(value = OrderAnnotation.class)
@@ -46,7 +42,7 @@ class StockMarketSimulationApplicationTests {
 	@Order(1)
 	void normalUserCanBeInserted() {
 		System.out.println("Test Normal User Insertion");
-		NormalUser user = new NormalUser.NormalUserBuilder()
+		NormalUser user = NormalUser.builder()
 							.setUsername("testUser")
 							.setPassword("testPassword")
 							.setEmail("testEmail@gamil.com")

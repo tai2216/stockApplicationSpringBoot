@@ -14,14 +14,14 @@ public class StockService {
 	
 	private StockService() {
 		if (this.restTemplate == null) {
-			logger.info("建立RestTemplate");
+			logger.debug("建立RestTemplate");
 			restTemplate = new RestTemplate();
 		}
 	}
 	
 //	@Scheduled(fixedRate = 1000)
 	public void testSchedule() {
-		logger.info("排程測試");
+		logger.debug("排程測試");
 	}
 	
 	public String getStockInfo() {
