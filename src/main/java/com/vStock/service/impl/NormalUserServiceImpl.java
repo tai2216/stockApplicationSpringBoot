@@ -17,7 +17,9 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.vStock.dao.MoneyAccountDao;
 import com.vStock.dao.NormalUserDao;
+import com.vStock.model.MoneyAccount;
 import com.vStock.model.NormalUser;
 import com.vStock.service.JavaMailService;
 import com.vStock.service.NormalUserService;
@@ -32,6 +34,9 @@ public class NormalUserServiceImpl implements NormalUserService{
 	
 	@Autowired
 	private NormalUserDao normalUserDao;
+	
+	@Autowired
+	private MoneyAccountDao moneyAccountDao;
 	
 	@Autowired
 	private JavaMailService mailService;
@@ -55,7 +60,12 @@ public class NormalUserServiceImpl implements NormalUserService{
 					.setRegisterDate(new Date(System.currentTimeMillis()))
 					.build();
 			normalUserDao.save(user);
-			normalUserDao.flush();
+			
+			//create money account
+			moneyAccountDao.save(MoneyAccount.builder()
+					.setFkUserId(user.getId())
+					.setIsFrozen(true)
+					.build());
 		    String[] receivers = {user.getEmail()};
 		    String subject = "[註冊成功] 請點擊信件連結以啟用帳號";
 		    String htmlContent = "<h1>您已成功註冊 Stock Market Simulation!</h1>"
@@ -63,10 +73,10 @@ public class NormalUserServiceImpl implements NormalUserService{
 		            + "<a href="+urlPrefix+"enableUser/?username="+username+">啟用帳號</a>";
 			mailService.sendMail(Arrays.asList(receivers), subject, htmlContent);
 		}catch(MessagingException me) {
-			logger.error(me.getCause());
+			logger.error("啟用信件寄件錯誤",me.getMessage());
 			throw new RuntimeException(me);
 		}catch(Exception e) {
-			logger.error(e.getCause());
+			logger.error("註冊失敗",e.getMessage());
 			throw new RuntimeException(e);
 		}
 	}
@@ -78,11 +88,13 @@ public class NormalUserServiceImpl implements NormalUserService{
 			if (user.get().isEnabled()) {
 				throw new RuntimeException("此帳號已啟用");
 			}
-			user.get().setEnabled(true);
+			int id = user.get().getId();
 			try {
-				normalUserDao.save(user.get());
+				normalUserDao.enableUser(id);
+				moneyAccountDao.unfreezeAccount(id);
 			}catch(Exception e) {
-				logger.error(e.getCause());
+				logger.error("使用者啟用帳號失敗或帳戶解凍失敗",e.getMessage());
+				throw new RuntimeException("使用者啟用帳號失敗或帳戶解凍失敗");
 			}
 		}else {
 			throw new UsernameNotFoundException("查無此使用者帳號");

@@ -38,20 +38,20 @@ public class RegistrationControllerTest {
     @Autowired
     private MockMvc mockMvc;
     
-    @Autowired
-    private RegistrationController registrationController;
+//    @Autowired
+//    private RegistrationController registrationController;
 
 //    @MockBean
-    @Autowired
-    private NormalUserServiceImpl normalUserService;
+//    @Autowired
+//    private NormalUserServiceImpl normalUserService;
     
 //    @MockBean
-    @Autowired
-    private NormalUserDao normalUserDao;
+//    @Autowired
+//    private NormalUserDao normalUserDao;
     
 //    @MockBean
-    @Autowired
-    private JavaMailService mailService;
+//    @Autowired
+//    private JavaMailService mailService;
 
 //    @BeforeEach
 //    public void setup() {
@@ -64,7 +64,7 @@ public class RegistrationControllerTest {
     @Test
     @Order(1)
     public void testRegisterUser_Failure() throws Exception {
-    	System.out.println("執行失敗案例");
+    	System.out.println("執行註冊使用者失敗案例");
 //        doThrow(new RuntimeException("Simulated error")).when(normalUserService).registerUser(any(HttpServletRequest.class), any(HttpServletResponse.class));
 
         mockMvc.perform(post("/register")
@@ -80,7 +80,7 @@ public class RegistrationControllerTest {
     @Test
     @Order(2)
     public void testRegisterUser_Success() throws Exception {
-    	System.out.println("執行成功案例");
+    	System.out.println("執行註冊使用者成功案例");
 //        doNothing().when(normalUserService).registerUser(any(HttpServletRequest.class), any(HttpServletResponse.class));
         
         mockMvc.perform(post("/register")
@@ -95,7 +95,7 @@ public class RegistrationControllerTest {
     @Test
     @Order(3)
 	public void testEnableUser_Failure() throws Exception {
-		System.out.println("執行失敗案例");
+		System.out.println("執行啟用使用者帳號失敗案例");
 //		doThrow(new RuntimeException("Simulated error")).when(normalUserService).enableUser(anyString(),
 //				any(HttpServletRequest.class), any(HttpServletResponse.class));
 
@@ -106,7 +106,7 @@ public class RegistrationControllerTest {
     @Test
     @Order(4)
 	public void testEnableUser_Success() throws Exception {
-		System.out.println("執行成功案例");
+		System.out.println("執行啟用使用者帳號成功案例");
 //		doNothing().when(normalUserService).enableUser(anyString(), any(HttpServletRequest.class),
 //				any(HttpServletResponse.class));
 
