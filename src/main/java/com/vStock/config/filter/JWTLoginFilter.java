@@ -27,6 +27,13 @@ public class JWTLoginFilter extends UsernamePasswordAuthenticationFilter{
 
 	private AuthenticationManager authenticationManager;
 	
+	private String jwtSecretKey;
+	
+	public JWTLoginFilter (AuthenticationManager authenticationManager, String jwtSecretKey) {
+		super(authenticationManager);
+		this.jwtSecretKey = jwtSecretKey;
+		
+	}
 	private static final Logger logger = LogManager.getLogger(JWTLoginFilter.class);
 	
 	public JWTLoginFilter(AuthenticationManager authenticationManager) {
@@ -73,11 +80,12 @@ public class JWTLoginFilter extends UsernamePasswordAuthenticationFilter{
 			logger.debug("Response Header: "+response.getHeader("Access-Control-Allow-Origin"));
 			logger.debug("successful");
 			logger.debug("JWT END-------------------");
+			logger.debug("JWT secret key: "+jwtSecretKey);
 			String token = Jwts.builder()
 					.setIssuer("Sam")
 					.setSubject(((org.springframework.security.core.userdetails.User) authResult.getPrincipal()).getUsername())
 					.setExpiration(new Date(System.currentTimeMillis() + 60 * 60 * 24 * 1000))
-					.signWith(SignatureAlgorithm.HS512, "MyJwtSecret")
+					.signWith(SignatureAlgorithm.HS512, jwtSecretKey)//todo:在啟動時產生密鑰交由porperties檔案管理
 					.compact();
 			logger.debug(token);
 			response.addHeader("loginUserName", authResult.getName());

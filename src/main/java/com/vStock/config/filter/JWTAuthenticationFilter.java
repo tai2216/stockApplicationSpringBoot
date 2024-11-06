@@ -23,8 +23,11 @@ public class JWTAuthenticationFilter extends BasicAuthenticationFilter{
 	
 	private static final Logger logger = LogManager.getLogger(JWTAuthentication.class);
 	
-	public JWTAuthenticationFilter(AuthenticationManager authenticationManager) {
+	private String jwtSecretKey;
+
+	public JWTAuthenticationFilter(AuthenticationManager authenticationManager, String jwtSecretKey) {
 		super(authenticationManager);
+		this.jwtSecretKey = jwtSecretKey;
 	}
 		 
 	@Override
@@ -48,9 +51,10 @@ public class JWTAuthenticationFilter extends BasicAuthenticationFilter{
 		String token = request.getHeader("Authorization");
 		if (token != null) {
 			logger.debug("JWTAuthenticationFilter: Token != null : "+token);
+			logger.debug("JWT secret key: "+jwtSecretKey);
 			// parse the token.
 			String user = Jwts.parser()
-							.setSigningKey("MyJwtSecret")
+							.setSigningKey(jwtSecretKey)
 							.parseClaimsJws(token.replace("Bearer ", ""))
 							.getBody()
 							.getSubject();

@@ -11,7 +11,6 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 public class StockMarketSimulationApplication {
 
 	public static void main(String[] args) {
-		SpringApplication.run(StockMarketSimulationApplication.class, args);
-	}
-
+		SpringApplication.run(StockMarketSimulationApplication.class,args);}
+	
 }

@@ -1,5 +1,9 @@
 package com.vStock.config;
 
+import java.security.SecureRandom;
+import java.util.Base64;
+import java.util.Random;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -10,11 +14,11 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.oauth2.client.oidc.userinfo.OidcUserService;
 
 import com.vStock.config.filter.JWTAuthenticationFilter;
 import com.vStock.config.filter.JWTLoginFilter;
-import com.vStock.service.impl.UsersDetailServiceImpl;
+import com.vStock.dao.JwtSecretKeyDao;
+import com.vStock.model.JwtSecretKey;
 
 //繼承 WebSecurityConfigurerAdapter才可自訂登入邏輯
 @Configuration
@@ -25,6 +29,9 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter{
 //	private UsersDetailServiceImpl service;
 	
 	@Autowired
+	private JwtSecretKeyDao jwtSecretKeyDao;
+	
+	@Autowired
 	private UserDetailsService service;
 
 //	@Autowired
@@ -32,6 +39,11 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter{
 	@Override
 	protected void configure(HttpSecurity http) throws Exception {
 		try {
+			//每次啟動應用都會重新生成一組jwtSecretKey並存入資料庫
+			jwtSecretKeyDao.deleteAll();
+			jwtSecretKeyDao.flush();
+			jwtSecretKeyDao.save(JwtSecretKey.builder().id(1).jwtKey(generateRandomKey(new Random().nextInt(100,200))).build());
+			String jwtSecretkey = jwtSecretKeyDao.findAll().get(0).getJwtKey();
 			http
 			.authorizeRequests()
 			.antMatchers("/login","/checkLogin","/oauth2/authorization/google","/register","/enableUser")
@@ -44,8 +56,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter{
 			.sessionManagement()
 			.sessionCreationPolicy(SessionCreationPolicy.STATELESS)//若這段啟用則會導致google第三方登入無法記錄使用者
 			.and()
-			.addFilter(new JWTLoginFilter(authenticationManager()))
-			.addFilter(new JWTAuthenticationFilter(authenticationManager()))
+			.addFilter(new JWTLoginFilter(authenticationManager(),jwtSecretkey))
+			.addFilter(new JWTAuthenticationFilter(authenticationManager(),jwtSecretkey))
 			.csrf().disable()
 			.formLogin()
 			.disable()
@@ -122,5 +134,15 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter{
 //    	service.setOauth2UserService(new com.vStock.service.impl.MyOidcUserServiceImpl());
 //    	return service;
 //    }
+	
+	/*
+	 * 動態生成Jwt Token的Secret Key
+	 * */
+    public static String generateRandomKey(int length) {
+        SecureRandom secureRandom = new SecureRandom();
+        byte[] key = new byte[length];
+        secureRandom.nextBytes(key);
+        return Base64.getEncoder().encodeToString(key);
+    }
 
 }

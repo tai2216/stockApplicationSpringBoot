@@ -25,10 +25,11 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Builder(access = lombok.AccessLevel.PUBLIC,setterPrefix = "set")
 @Entity
-@Table(name = "STOCK_HOLDING_DETAILS")
+@Table(name = "STOCK_HOLDING")
 @DynamicInsert
 @DynamicUpdate
-public class StockHoldingDetails {//使用者持股明細TABLE
+public class StockHolding {//使用者持股TABLE
+	
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	@Column(name = "SERIAL_NO"
@@ -39,29 +40,25 @@ public class StockHoldingDetails {//使用者持股明細TABLE
 	@Column(name = "FK_USER_ID")
 	private int fkUserId;
 	
-	@Column(name = "STOCK_CODE")
+	@Column(name="STOCK_CODE")
 	private String stockCode;
 	
-	@Column(name = "STOCK_NAME")
+	@Column(name="STOCK_NAME")
 	private String stockName;
 	
-	@Column(name = "QUANTITY")
-	private int quantity;
+	@Column(name="PRICE_AVERAGE")
+	private double priceAverage;
 	
-	@Column(name = "TRANSACTION_DATE")
-	private Date transactionDate;
+	@Column(name="TOTAL_QUANTITY")
+	private int totalQuantity;
 	
-	@Column(name = "TRANSACTION_TYPE")
-	private String transactionType;
+	@Column(name="TOTAL_COST")
+	private BigDecimal totalCost;
 	
-	@Column(name = "PRICE")
-	private double price;
-	
-	@Column(name = "COST")
-	private BigDecimal cost;
 	
 	@ManyToOne(targetEntity = NormalUser.class
 			,optional = true)
 	@JoinColumn(name = "FK_USER_ID")
 	private int getNormalUserId() {return this.fkUserId;};
+	
 }

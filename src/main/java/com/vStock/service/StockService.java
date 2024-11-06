@@ -9,6 +9,8 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collector;
+import java.util.stream.Collectors;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -30,11 +32,13 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vStock.dao.MoneyAccountDao;
 import com.vStock.dao.NormalUserDao;
+import com.vStock.dao.StockHoldingDao;
 import com.vStock.dao.StockHoldingDetailsDao;
 import com.vStock.dao.StockTransactionDao;
 import com.vStock.dao.Twt84uDao;
 import com.vStock.model.MoneyAccount;
 import com.vStock.model.NormalUser;
+import com.vStock.model.StockHolding;
 import com.vStock.model.StockHoldingDetails;
 import com.vStock.model.StockTransaction;
 import com.vStock.model.TWT84U;
@@ -58,6 +62,9 @@ public class StockService {
 	
 	@Autowired
 	private Twt84uDao twt84uDao;
+	
+	@Autowired
+	private StockHoldingDao stockHoldingDao;
 	
 	@Autowired
 	private StockHoldingDetailsDao stockHoldingDetailsDao;
@@ -198,17 +205,23 @@ public class StockService {
 				throw new RuntimeException("This account is frozen");
 			}
 			BigDecimal cost = new BigDecimal(price * quantity);
-			if(type==TransactionType.BUY) {//買的話就減帳戶的錢
-				BigDecimal balance = account.get().getBalance();
+			BigDecimal balance = account.get().getBalance();
+			Optional<StockHolding> stockHoldingO = stockHoldingDao.findByFkUserIdAndStockCode(userId, stockCode);
+			if(TransactionType.BUY==type) {//買的話就減帳戶的錢
 				if (balance.compareTo(cost) < 0) {
-					throw new RuntimeException("餘額不足");
+					throw new RuntimeException("帳戶餘額不足");
 				}
 				moneyAccountDao.updateMoney(account.get().getFkUserId()
 						, balance.subtract(cost));
-			}else if(type==TransactionType.SELL) {//賣的話就加帳戶的錢
-				BigDecimal balance = account.get().getBalance();
-				//todo:檢查使用者手上的持股是否夠他想賣出的數量
-//				stockHoldingDetailsDao.findById(null)
+			}else if(TransactionType.SELL==type) {//賣的話就加帳戶的錢
+				//檢查使用者手上的持股是否夠他想賣出的數量
+				if(stockHoldingO.isEmpty()) {
+					throw new RuntimeException("未持有此檔股票: "+stockCode);
+				}
+				StockHolding stockHolding = stockHoldingO.get();
+				if (stockHolding.getTotalQuantity() < quantity) {
+					throw new RuntimeException("持有單位不足: " + stockHolding.getTotalQuantity());
+				}
 				if (cost.compareTo(balance) >=1) {
 					throw new RuntimeException("賣出的金額有誤，餘額為: "+balance
 							+" 賣出金額為: "+cost);
@@ -221,15 +234,36 @@ public class StockService {
 			String stockName = twt84uDao.findNameByCode(stockCode);
 			stockHoldingDetailsDao.save(StockHoldingDetails.builder()
 					.setFkUserId(userId)
-			        .setStockCode(stockCode)
-			        .setStockName(stockName)
-			        .setQuantity(quantity)
-			        .setTransactionDate(new Date(System.currentTimeMillis()))
-			        .setTransactionType(type.toString())
-			        .setPrice(price)
-			        .setCost(cost)
-			        .build());
-			
+					.setStockCode(stockCode)
+					.setStockName(stockName)
+					.setQuantity(quantity)
+					.setTransactionDate(new Date(System.currentTimeMillis()))
+					.setTransactionType(type.toString())
+					.setPrice(TransactionType.BUY==type? price : -price)//如果是賣出則價格轉為負數
+					.setCost(TransactionType.BUY==type? cost : cost.negate())//如果是賣出則成本轉為負數)
+					.build());
+			//若是要買入且手上持股為空則新增持股資訊，賣出則不檢查因為上面已檢查過，其餘情況一率更新持股資訊
+			if(TransactionType.BUY==type & stockHoldingO.isEmpty()) {
+				stockHoldingDao.save(StockHolding.builder()
+						.setFkUserId(userId)
+						.setStockCode(stockCode)
+						.setStockName(stockName)
+						.setPriceAverage(price)
+						.setTotalQuantity(quantity)
+						.setTotalCost(cost)
+						.build());
+			}else {
+				//更新持股資訊
+				StockHolding stockHolding = stockHoldingO.get();
+				List<StockHoldingDetails> stockHoldingDetails = stockHoldingDetailsDao.findByFkUserIdAndStockCode(userId, stockCode).get();
+				int totalQuantity = stockHoldingDetails.stream().collect(Collectors.summingInt(StockHoldingDetails::getQuantity));
+				stockHolding.setTotalQuantity(totalQuantity);
+				BigDecimal totalCost = stockHoldingDetails.stream().map(StockHoldingDetails::getCost).reduce(BigDecimal.ZERO, BigDecimal::add);
+				stockHolding.setTotalCost(totalCost);
+				double priceAverage = totalCost.divide(new BigDecimal(totalQuantity)).doubleValue();
+				stockHolding.setPriceAverage(priceAverage);
+				stockHoldingDao.save(stockHolding);
+			}
 			return stockTransactionDao.save(StockTransaction.builder()
 					.setFkUserId(userId)
 					.setStockCode(stockCode)
@@ -240,8 +274,8 @@ public class StockService {
 					.build());
 		}catch(Exception e) {
 			logger.error("交易失敗", e.getMessage());
+			throw new RuntimeException("交易失敗: "+ e.getMessage());
 		}
-		return null;
 	}
 
 }
