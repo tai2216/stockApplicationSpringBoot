@@ -34,6 +34,8 @@ public class StockControllerTest {
 	@Autowired
 	private JwtSecretKeyDao jwtSecretKeyDao;
 	
+	private static String latestStockDay = "1131106";
+	
     private String generateJwtToken() {
 //		String jwtSecretkey = (String) ((Map<String,Object>)env.getPropertySources().get("jwtProperties").getSource()).get("jwtSecretKey");
 		String jwtSecretkey = jwtSecretKeyDao.findAll().get(0).getJwtKey();
@@ -56,29 +58,29 @@ public class StockControllerTest {
                 .param("userId", "999")
                 .param("quantity", "9")
                 .param("stockCode", "2330")
-                .param("date", "1131104")))
+                .param("date", latestStockDay)))
                 .andExpect(status().isInternalServerError())
                 .andExpect(jsonPath("$.message").value("交易失敗"))
+                .andExpect(jsonPath("$.error").value(new TestMatcher<String>("交易失敗: 未找到使用者: ")))
                 .andReturn()
                 .getResponse()
                 .getWriter().println();
     }
 
-//    @Test
-//    @Order(2)
-//    void buyStockSuccessed() throws Exception {
-//        mockMvc.perform(addJwtToken(post("/buyStock")
-//                .param("userId", "1")
-//                .param("quantity", "3000")
-//                .param("stockCode", "2330")
-//                .param("date", "1131104")))
-//                .andExpect(status().isOk())
-//                .andExpect(jsonPath("$.message").value("交易成功"))
-//                .andReturn()
-//                .getResponse()
-//                .getWriter().println();
-//        
-//    }
+    @Test
+    @Order(2)
+    void buyStockSuccessed() throws Exception {
+        mockMvc.perform(addJwtToken(post("/buyStock")
+                .param("userId", "1")
+                .param("quantity", "10")
+                .param("stockCode", "2330")
+                .param("date", latestStockDay)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.message").value("交易成功"))
+                .andReturn()
+                .getResponse()
+                .getWriter().println();
+    }
     
     @Test
     @Order(3)
@@ -87,9 +89,9 @@ public class StockControllerTest {
     			.param("userId", "1")
     			.param("quantity", "3001")
     			.param("stockCode", "2330")
-    			.param("date", "1131104")))
+    			.param("date", latestStockDay)))
     	        .andExpect(status().isInternalServerError())
-    	        .andExpect(jsonPath("$.error").value("交易失敗: 未持有此檔股票: 2330"))
+    	        .andExpect(jsonPath("$.error").value(new TestMatcher<String>("交易失敗: 持有單位不足: ")))
                 .andReturn()
                 .getResponse()
                 .getWriter().println();
@@ -100,7 +102,7 @@ public class StockControllerTest {
     void sellStockFailed2() throws Exception{
     	mockMvc.perform(addJwtToken(post("/sellStock")
     			.param("userId", "1")
-    			.param("quantity", "3001")
+    			.param("quantity", "10")
     			.param("stockCode", "2330")
     			.param("date", "11311045")))
     	.andExpect(status().isInternalServerError())
@@ -113,14 +115,28 @@ public class StockControllerTest {
     void sellStockFailed3() throws Exception{
     	mockMvc.perform(addJwtToken(post("/sellStock")
     			.param("userId", "1")
-    			.param("quantity", "3000")
+    			.param("quantity", "10")
     			.param("stockCode", "2331")
-    			.param("date", "1131104")))
+    			.param("date", latestStockDay)))
     	.andExpect(status().isInternalServerError())
     	.andExpect(jsonPath("$.error").value(new TestMatcher<String>("交易失敗: 未持有此檔股票: ")))
         .andReturn()
         .getResponse()
         .getWriter().println();
+    }
+    @Test
+    @Order(6)
+    void sellStockSuccessed() throws Exception{
+    	mockMvc.perform(addJwtToken(post("/sellStock")
+    			.param("userId", "1")
+    			.param("quantity", "10")
+    			.param("stockCode", "2330")
+    			.param("date", latestStockDay)))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.message").value("交易成功"))
+    	.andReturn()
+    	.getResponse()
+    	.getWriter().println();
     }
     
     

@@ -37,11 +37,11 @@ public class TWT84U {
 	private int id;
 	
 	@JsonProperty("Code")
-	@Column(name = "code",columnDefinition = "varchar(10)")
+	@Column(name = "code",columnDefinition = "varchar(10)",unique = true)
 	private String code;
 	
 	@JsonProperty("Name")
-	@Column(name = "name",columnDefinition = "varchar(50)")
+	@Column(name = "name",columnDefinition = "varchar(50)",unique = true)
 	private String name;
 	
 	@JsonProperty("TodayLimitUp")

@@ -9,6 +9,7 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import javax.validation.constraints.NotEmpty;
@@ -21,11 +22,14 @@ import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vStock.dao.MoneyAccountDao;
 import com.vStock.dao.NormalUserDao;
@@ -66,18 +70,36 @@ public class StockService {
 	@Autowired
 	private StockHoldingDetailsDao stockHoldingDetailsDao;
 	
-	
-	public StockService() {
+	public StockService() throws JsonMappingException, JsonProcessingException {
 		if (this.restTemplate == null) {
 			logger.debug("建立RestTemplate");
 			restTemplate = new RestTemplate();
 		}
-		this.saveApiDataToExcel();
+		this.saveApiDataToExcel();//保存歷史資料到excel,目前還無使用規劃但先保存
+//		this.testSchedule();
 	}
 	
-//	@Scheduled(fixedRate = 1000)
+	@Scheduled(fixedRate = 8,timeUnit = TimeUnit.HOURS,zone = "Asia/Taipei")
+	@Transactional
 	public void testSchedule() {
-		logger.debug("排程測試");
+		if("1".equals("1")) {//測試開發時使用，不須每次啟動都執行
+			logger.debug("排程測試今日已執行");
+			return;
+		}
+		try {
+			logger.debug("排程測試");
+			logger.debug("執行清空股票資訊...");
+			twt84uDao.deleteAll();
+			logger.debug("已清空股票資訊...");
+			ObjectMapper mapper = new ObjectMapper();
+			String result = this.getStockInfo();
+			List<TWT84U> table = mapper.readValue(result, new TypeReference<List<TWT84U>>() {});
+			twt84uDao.saveAll(table);
+			twt84uDao.flush();
+			logger.debug("已完成更新證交所api最新股票資料!");
+		}catch(Exception e) {
+			logger.error("證交所api最新股票資料更新至資料庫失敗: ",e.getMessage());
+		}
 	}
 	/*
 	 * 取得台股證交所股票資訊(前一日收盤價)
@@ -87,20 +109,21 @@ public class StockService {
 		return restTemplate.getForObject(url, String.class);
 	}
 	/*
-	 * 將取得的股票api資料存入桌面excel以利測試時刪table也可留存
+	 * 將取得的股票api資料存入桌面excel以利測試時使用drop table，也仍有留存資料供日後使用
 	 * */
 	public void saveApiDataToExcel() {
 		String today = LocalDate.now().format(DateTimeFormatter.ofPattern("yyyyMMdd"));
+		String seperator = System.getProperty("file.separator");
 	    //C:\Users\tiebi\桌面\證交所excel\證交所api記錄檔.xlsx
 	    String path = System.getProperty("user.home")
-	    		+System.getProperty("file.separator")
+	    		+seperator
 	    		+"桌面"
-	    		+System.getProperty("file.separator")
+	    		+seperator
 	    		+"證交所excel"
-	    		+System.getProperty("file.separator")
+	    		+seperator
 	    		+"證交所api記錄檔"+today+".xlsx";
 		if (new File(path).exists()) {
-			System.out.println("檔案: "+path+"已存在");
+			logger.debug("檔案: "+path+"已存在");
 			return;
 	    }
 		ObjectMapper objectMapper = new ObjectMapper();
@@ -108,7 +131,7 @@ public class StockService {
 		try {
 			table = objectMapper.readValue(this.getStockInfo(), new TypeReference<List<TWT84U>>() {});
 		} catch (Exception e) {
-			e.printStackTrace();
+			logger.debug("證交所API資料轉換失敗: "+e.getMessage());
 			return;
 		} 
 	    Workbook workbook = new XSSFWorkbook();
@@ -170,12 +193,14 @@ public class StockService {
 	    try (FileOutputStream fileOut = new FileOutputStream(path)) {
 	        workbook.write(fileOut);
 	    }catch(Exception e){
-	    	e.printStackTrace();
+//	    	e.printStackTrace();
+	    	logger.debug(e.getMessage());
 	    }finally{
 	    	try {
 				workbook.close();
 			} catch (IOException e) {
-				e.printStackTrace();
+//				e.printStackTrace();
+				logger.debug(e.getMessage());
 			}
 	    }
 	    logger.debug("證交所API檔案已輸出至路徑: "+path);
@@ -195,7 +220,11 @@ public class StockService {
 			if((!user.get().isEnabled())) {
 				throw new RuntimeException("此帳號狀態目前為停用");
 			}
-			double price =Double.valueOf(twt84uDao.findPrviousDayPriceByCodeAndDate(stockCode,date));
+			Optional<String> p = twt84uDao.findPrviousDayPriceByCodeAndDate(stockCode,date);
+			if (p.isEmpty()) {
+				throw new RuntimeException("未找到此檔股票: " + stockCode);
+			}
+			double price =Double.valueOf(p.get());
 			
 			Optional<MoneyAccount> account = moneyAccountDao.findByFkUserId(userId);
 			if(account.isEmpty()) {
@@ -232,16 +261,7 @@ public class StockService {
 				throw new RuntimeException("不明的交易種類，請指定買或賣");
 			}
 			String stockName = twt84uDao.findNameByCode(stockCode);
-			stockHoldingDetailsDao.save(StockHoldingDetails.builder()
-					.setFkUserId(userId)
-					.setStockCode(stockCode)
-					.setStockName(stockName)
-					.setQuantity(quantity)
-					.setTransactionDate(new Date(System.currentTimeMillis()))
-					.setTransactionType(type.toString())
-					.setPrice(TransactionType.BUY==type? price : -price)//如果是賣出則價格轉為負數
-					.setCost(TransactionType.BUY==type? cost : cost.negate())//如果是賣出則成本轉為負數)
-					.build());
+
 			//若是要買入且手上持股為空則新增持股資訊，賣出則不檢查因為上面已檢查過，其餘情況一率更新持股資訊
 			if(TransactionType.BUY==type & stockHoldingO.isEmpty()) {
 				stockHoldingDao.save(StockHolding.builder()
@@ -252,30 +272,68 @@ public class StockService {
 						.setTotalQuantity(quantity)
 						.setTotalCost(cost)
 						.build());
+			}
+			stockHoldingDetailsDao.save(StockHoldingDetails.builder()
+					.setFkUserId(userId)
+					.setFkStockHoldingNo(stockHoldingDao.findByFkUserIdAndStockCode(userId,stockCode)
+														.orElseThrow(()->new RuntimeException("找不到此持股")).getSerialNo())
+					.setStockCode(stockCode)
+					.setStockName(stockName)
+					.setQuantity(TransactionType.BUY==type? quantity : -quantity)//如果是賣出則數量轉為負數)
+					.setTransactionDate(new Date(System.currentTimeMillis()))
+					.setTransactionType(type.toString())
+					.setPrice(TransactionType.BUY==type? price : -price)//如果是賣出則價格轉為負數
+					.setCost(TransactionType.BUY==type? cost : cost.negate())//如果是賣出則成本轉為負數)
+					.build());
+			//更新持股資訊
+			StockHolding stockHolding = stockHoldingDao.findByFkUserIdAndStockCode(userId, stockCode)
+														.orElseThrow(()->new RuntimeException("找不到此持股"));
+			List<StockHoldingDetails> stockHoldingDetails = stockHoldingDetailsDao.findByFkUserIdAndStockCode(userId, stockCode)
+																					.orElseThrow(()->new RuntimeException("找不到此持股細節"));
+			int totalQuantity = stockHoldingDetails.stream().collect(Collectors.summingInt(StockHoldingDetails::getQuantity));
+			BigDecimal totalCost = stockHoldingDetails.stream().map(StockHoldingDetails::getCost).reduce(BigDecimal.ZERO, BigDecimal::add);
+			if(checkStockHoldingAllZero(totalQuantity, totalCost)) {
+//				此時關聯到的持股明細不會更新(可能是因為交易尚未被成立)，因此需要自己去做更新，這樣才會在後續的刪除操作自動關聯相關的持股明細且一起跟著持股被刪除
+//				stockHoldingDao.findById(stockHolding.getSerialNo())
+//								.get().setStockHoldingDetailsList(stockHoldingDetailsDao.findByFkUserIdAndStockCode(userId,stockCode).get());
+				//fk關聯在這個交易中不會實時更新，所以乾脆自己刪比較快
+				stockHoldingDetailsDao.deleteAll(stockHoldingDetailsDao.findByFkUserIdAndStockCode(userId,stockCode)
+																		.orElseThrow(()-> new RuntimeException("刪除持股明細失敗")));
+				//如果賣出後持股數為0以及其他各項數字皆為0則可以直接刪除此筆資料
+				stockHoldingDao.deleteById(stockHolding.getSerialNo());
 			}else {
-				//更新持股資訊
-				StockHolding stockHolding = stockHoldingO.get();
-				List<StockHoldingDetails> stockHoldingDetails = stockHoldingDetailsDao.findByFkUserIdAndStockCode(userId, stockCode).get();
-				int totalQuantity = stockHoldingDetails.stream().collect(Collectors.summingInt(StockHoldingDetails::getQuantity));
-				stockHolding.setTotalQuantity(totalQuantity);
-				BigDecimal totalCost = stockHoldingDetails.stream().map(StockHoldingDetails::getCost).reduce(BigDecimal.ZERO, BigDecimal::add);
-				stockHolding.setTotalCost(totalCost);
 				double priceAverage = totalCost.divide(new BigDecimal(totalQuantity)).doubleValue();
+				stockHolding.setTotalQuantity(totalQuantity);
+				stockHolding.setTotalCost(totalCost);
 				stockHolding.setPriceAverage(priceAverage);
 				stockHoldingDao.save(stockHolding);
 			}
 			return stockTransactionDao.save(StockTransaction.builder()
 					.setFkUserId(userId)
 					.setStockCode(stockCode)
-					.setQuantity(quantity)
-					.setPrice(price)
+					.setQuantity(TransactionType.BUY==type? quantity: -quantity)
+					.setPrice(TransactionType.BUY==type? price : -price)
 					.setTransactionDate(new Date(System.currentTimeMillis()))
 					.setTransactionType(type.toString())
 					.build());
 		}catch(Exception e) {
+//			e.printStackTrace();
 			logger.error("交易失敗", e.getMessage());
 			throw new RuntimeException("交易失敗: "+ e.getMessage());
 		}
+	}
+	
+	public boolean checkStockHoldingAllZero(int totalQuantity, BigDecimal totalCost) {
+		int totalCostCompareResult = totalCost.compareTo(BigDecimal.ZERO);
+		if(totalQuantity==0&totalCostCompareResult==0) {
+			return true;
+		}
+		if(totalQuantity==0 & (totalCostCompareResult>0 || totalCostCompareResult<0) ){
+			throw new RuntimeException("計算金額(賣股後持有數量等於0但持有成本大於0或小於0)有誤");
+		}else if (totalCostCompareResult == 0 & totalQuantity != 0) {
+			throw new RuntimeException("計算金額(賣股後持有成本等於0但持有數量不為0)有誤");
+		}
+		return false;
 	}
 
 }

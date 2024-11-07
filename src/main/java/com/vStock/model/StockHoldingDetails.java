@@ -5,6 +5,7 @@ import java.sql.Date;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -36,6 +37,9 @@ public class StockHoldingDetails {//使用者持股明細TABLE
 			,unique = true)
 	private int serialNo;
 	
+	@Column(name = "FK_STOCK_HOLDING_NO")
+	private int fkStockHoldingNo;
+	
 	@Column(name = "FK_USER_ID")
 	private int fkUserId;
 	
@@ -64,4 +68,13 @@ public class StockHoldingDetails {//使用者持股明細TABLE
 			,optional = true)
 	@JoinColumn(name = "FK_USER_ID")
 	private int getNormalUserId() {return this.fkUserId;};
+	
+	@ManyToOne(targetEntity = StockHolding.class
+			,optional = true
+			,fetch = FetchType.EAGER)
+	@JoinColumn(name = "FK_STOCK_HOLDING_NO")
+	private int getfkStockHoldingNo() {return this.fkStockHoldingNo;};
+
+	
+	
 }

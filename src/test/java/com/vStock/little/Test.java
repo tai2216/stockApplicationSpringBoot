@@ -1,15 +1,13 @@
 package com.vStock.little;
 
+import java.math.BigDecimal;
 import java.security.SecureRandom;
 import java.util.Base64;
 import java.util.Random;
 
 public class Test {
 	public static void main(String[] args) {
-//		System.out.println(generateRandomKey(new Random().nextInt(100,200)));
-		System.out.println(generateRandomKey(1));
-		System.out.println(generateRandomKey(1));
-		System.out.println(generateRandomKey(1));
+        System.out.println(BigDecimal.ZERO.divide(new BigDecimal(1)));
 	}
 	
     public static String generateRandomKey(int length) {

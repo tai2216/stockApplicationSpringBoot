@@ -25,5 +25,5 @@ public interface Twt84uDao extends JpaRepository<TWT84U, Integer>{
 	@Query(nativeQuery = true
 			, value = "SELECT DISTINCT PREVIOUS_DAY_PRICE FROM TWT84U WHERE CODE = :code AND LAST_TRADING_DAY = :date")
 	@Transactional(readOnly = true)
-	public String findPrviousDayPriceByCodeAndDate(String code, String date);
+	public Optional<String> findPrviousDayPriceByCodeAndDate(String code, String date);
 }

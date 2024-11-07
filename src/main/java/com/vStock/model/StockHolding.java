@@ -1,15 +1,18 @@
 package com.vStock.model;
 
 import java.math.BigDecimal;
-import java.sql.Date;
+import java.util.List;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
 import org.hibernate.annotations.DynamicInsert;
@@ -60,5 +63,11 @@ public class StockHolding {//使用者持股TABLE
 			,optional = true)
 	@JoinColumn(name = "FK_USER_ID")
 	private int getNormalUserId() {return this.fkUserId;};
+	
+	@OneToMany(fetch = FetchType.EAGER,
+			mappedBy = "fkStockHoldingNo",
+			cascade = CascadeType.ALL)
+	private List<StockHoldingDetails> stockHoldingDetailsList;
+
 	
 }

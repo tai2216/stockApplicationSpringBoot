@@ -14,7 +14,6 @@ import com.vStock.other.TransactionType;
 @Repository
 public interface StockHoldingDetailsDao extends JpaRepository<StockHoldingDetails, Integer>{
 	
-	//todo:需要考慮一下到底要不要把details整合為另一個table免得每次計算
 	@Query(nativeQuery = true
 			,value = "SELECT * FROM STOCK_HOLDING_DETAILS WHERE FK_USER_ID = :fkUserId")
 	@Transactional(readOnly = true)
