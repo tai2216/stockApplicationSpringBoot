@@ -6,7 +6,10 @@ import java.util.Random;
 
 public class Test {
 	public static void main(String[] args) {
-		System.out.println(generateRandomKey(new Random().nextInt(100,200)));
+//		System.out.println(generateRandomKey(new Random().nextInt(100,200)));
+		System.out.println(generateRandomKey(1));
+		System.out.println(generateRandomKey(1));
+		System.out.println(generateRandomKey(1));
 	}
 	
     public static String generateRandomKey(int length) {

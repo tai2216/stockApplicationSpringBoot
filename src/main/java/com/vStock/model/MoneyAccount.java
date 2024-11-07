@@ -39,13 +39,13 @@ public class MoneyAccount {
 	@Column(name = "FK_USER_ID")
 	private int fkUserId;
 	
-	@Column(name = "BALANCE", columnDefinition = "DECIMAL(20,2) DEFAULT 0.00")
+	@Column(name = "BALANCE", columnDefinition = "DECIMAL(20,0) DEFAULT 100000")//剛出社會的小資族，一開始戶頭只有10萬元
 	private BigDecimal balance;
 	
 	@Column(name = "CURRENCY", columnDefinition = "NVARCHAR(3) DEFAULT 'TWD'")
 	private String currency;
 	
-	@Column(name = "IS_FROZEN",columnDefinition = "BIT DEFAULT 0")
+	@Column(name = "IS_FROZEN",columnDefinition = "BIT DEFAULT 1")
 	private boolean isFrozen;
 	
 	@Column(name = "REMARK")

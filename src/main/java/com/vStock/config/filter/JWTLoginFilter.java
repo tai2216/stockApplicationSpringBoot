@@ -31,6 +31,7 @@ public class JWTLoginFilter extends UsernamePasswordAuthenticationFilter{
 	
 	public JWTLoginFilter (AuthenticationManager authenticationManager, String jwtSecretKey) {
 		super(authenticationManager);
+		this.authenticationManager = authenticationManager;
 		this.jwtSecretKey = jwtSecretKey;
 		
 	}

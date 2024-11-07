@@ -90,7 +90,7 @@ public class NormalUserServiceImpl implements NormalUserService{
 			}
 			int id = user.get().getId();
 			try {
-				normalUserDao.enableUser(id);
+				normalUserDao.enableUser(id, new Date(System.currentTimeMillis()));
 				moneyAccountDao.unfreezeAccount(id);
 			}catch(Exception e) {
 				logger.error("使用者啟用帳號失敗或帳戶解凍失敗",e.getMessage());
@@ -100,5 +100,15 @@ public class NormalUserServiceImpl implements NormalUserService{
 			throw new UsernameNotFoundException("查無此使用者帳號");
 		}
 		
+	}
+
+	@Transactional
+	public void updateLoginDate(String username) {
+		NormalUser user = normalUserDao.findByUsername(username)
+				.orElseThrow(() -> new RuntimeException("查無此使用者帳號"));
+		if(!user.isEnabled()) {
+			throw new RuntimeException("此帳號狀態目前為停用");
+		}
+		normalUserDao.updateLoginDate(user.getId(), new Date(System.currentTimeMillis()));
 	}
 }

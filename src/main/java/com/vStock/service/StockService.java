@@ -9,11 +9,8 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import javax.validation.constraints.NotEmpty;
 
 import org.apache.logging.log4j.LogManager;
@@ -192,17 +189,20 @@ public class StockService {
 											,@NotEmpty String date) {
 		try {
 			Optional<NormalUser> user = normalUserDao.findById(userId);
-			if(user.isEmpty() || (!user.get().isEnabled()) ) {
-				throw new RuntimeException("User not found or disabled");
+			if(user.isEmpty()) {
+				throw new RuntimeException("未找到使用者: "+userId);
+			}
+			if((!user.get().isEnabled())) {
+				throw new RuntimeException("此帳號狀態目前為停用");
 			}
 			double price =Double.valueOf(twt84uDao.findPrviousDayPriceByCodeAndDate(stockCode,date));
 			
 			Optional<MoneyAccount> account = moneyAccountDao.findByFkUserId(userId);
 			if(account.isEmpty()) {
-				throw new RuntimeException("Account not found");
+				throw new RuntimeException("未找到使用者存款帳戶");
 			}
 			if(account.get().isFrozen()) {
-				throw new RuntimeException("This account is frozen");
+				throw new RuntimeException("此使用者存款帳戶已被凍結");
 			}
 			BigDecimal cost = new BigDecimal(price * quantity);
 			BigDecimal balance = account.get().getBalance();

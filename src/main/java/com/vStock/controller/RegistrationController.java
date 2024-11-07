@@ -11,13 +11,13 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.vStock.model.GeneralResponse;
-import com.vStock.service.impl.NormalUserServiceImpl;
+import com.vStock.service.NormalUserService;
 
 @RestController
 public class RegistrationController {
 	
 	@Autowired
-	private NormalUserServiceImpl normalUserService;
+	private NormalUserService normalUserService;
 	
 	@RequestMapping(value = "/register"
 			,method = { RequestMethod.POST}

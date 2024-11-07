@@ -32,23 +32,23 @@ public class LoginControllerTest {
 	@Autowired
     private MockMvc mockMvc;
 	
-    @Autowired
-    private LoginController loginController;
+//    @Autowired
+//    private LoginController loginController;
 
 //    @MockBean
-    @Autowired
-    private NormalUserServiceImpl normalUserService;
+//    @Autowired
+//    private NormalUserServiceImpl normalUserService;
     
 //    @MockBean
-    @Autowired
-    private NormalUserDao normalUserDao;
+//    @Autowired
+//    private NormalUserDao normalUserDao;
     
 //    @MockBean
-    @Autowired
-    private JavaMailService mailService;
+//    @Autowired
+//    private JavaMailService mailService;
     
-    @Autowired
-    private UsersDetailServiceImpl usersDetailServiceImpl;
+//    @Autowired
+//    private UsersDetailServiceImpl usersDetailServiceImpl;
     
 //    @BeforeEach
 //    public void setup() {
