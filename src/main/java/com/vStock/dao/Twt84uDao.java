@@ -4,13 +4,14 @@ import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.vStock.model.TWT84U;
 
 @Repository
-public interface Twt84uDao extends JpaRepository<TWT84U, Integer>{
+public interface Twt84uDao extends JpaRepository<TWT84U, Integer>, PagingAndSortingRepository<TWT84U, Integer>{
 	
 	@Query(nativeQuery = true
 			, value = "SELECT * FROM TWT84U WHERE CODE = :stockCode")

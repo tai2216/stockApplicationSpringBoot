@@ -7,6 +7,7 @@ import java.math.BigDecimal;
 import java.sql.Date;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
@@ -22,9 +23,13 @@ import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 import org.springframework.web.client.RestTemplate;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -70,6 +75,12 @@ public class StockService {
 	@Autowired
 	private StockHoldingDetailsDao stockHoldingDetailsDao;
 	
+	private String[] columnNameArray = {
+			"Code", "Name", "TodayLimitUp", "TodayOpeningRefPrice", "TodayLimitDown", "PreviousDayOpeningRefPrice",
+			"PreviousDayPrice", "PreviousDayLimitUp", "PreviousDayLimitDown", "LastTradingDay",
+			"AllowOddLotTrade"
+	};
+	
 	public StockService() throws JsonMappingException, JsonProcessingException {
 		if (this.restTemplate == null) {
 			logger.debug("建立RestTemplate");
@@ -87,18 +98,19 @@ public class StockService {
 			return;
 		}
 		try {
-			logger.debug("排程測試");
-			logger.debug("執行清空股票資訊...");
-			twt84uDao.deleteAll();
-			logger.debug("已清空股票資訊...");
+			logger.debug("排程測試，取得最新證交所API資料...請稍後");
 			ObjectMapper mapper = new ObjectMapper();
 			String result = this.getStockInfo();
 			List<TWT84U> table = mapper.readValue(result, new TypeReference<List<TWT84U>>() {});
+			logger.debug("執行清空資料庫股票資訊(Table名稱:TWT84U)...請稍後");
+			twt84uDao.deleteAll();
+			twt84uDao.flush();
+			logger.debug("已清空股票資訊(Table名稱:TWT84U)...請稍後");
 			twt84uDao.saveAll(table);
 			twt84uDao.flush();
-			logger.debug("已完成更新證交所api最新股票資料!");
+			logger.debug("已完成更新證交所api最新股票資料(Table名稱:TWT84U)!");
 		}catch(Exception e) {
-			logger.error("證交所api最新股票資料更新至資料庫失敗: ",e.getMessage());
+			logger.error("證交所api最新股票資料更新至資料庫失敗(Table名稱:TWT84U): "+e.getMessage());
 		}
 	}
 	/*
@@ -108,6 +120,39 @@ public class StockService {
 		String url = "https://openapi.twse.com.tw/v1/exchangeReport/TWT84U";
 		return restTemplate.getForObject(url, String.class);
 	}
+	
+	public boolean checkColumnName(String columnName) {
+		boolean columnNameExist = false;
+		for(String s : this.columnNameArray) {
+			if(columnName.equals(s)) {
+				columnNameExist = true;
+				break;
+			}
+		}
+		return columnNameExist;
+	}
+	
+	public Page<TWT84U> getStockByPage(int page, int size){
+		PageRequest of = PageRequest.of(page,size);
+		return twt84uDao.findAll(of);
+		
+	}
+	public Page<TWT84U> getStockByPageWithSort(int page, int size, @NotEmpty String columnName, String ascOrDesc){
+		if(!StringUtils.hasText(ascOrDesc)) {
+			ascOrDesc = "asc";//若這個參數有問題則預設給asc排序
+		}
+		if(!checkColumnName(columnName)) {
+			throw new RuntimeException("錯誤的排序欄位名稱: "+columnName+", 必須為: "+Arrays.toString(this.columnNameArray)+"的其中一種且大小寫須完全符合");
+		}
+		PageRequest of = null;
+		if(ascOrDesc.toLowerCase().equals("desc")) {
+			of = PageRequest.of(page,size, Sort.by(columnName).descending());
+		}else {
+			of = PageRequest.of(page,size, Sort.by(columnName).ascending());
+		}
+		return twt84uDao.findAll(of);
+	}
+	
 	/*
 	 * 將取得的股票api資料存入桌面excel以利測試時使用drop table，也仍有留存資料供日後使用
 	 * */

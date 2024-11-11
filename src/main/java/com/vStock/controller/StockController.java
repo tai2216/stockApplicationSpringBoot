@@ -67,5 +67,29 @@ public class StockController {
 		
 	}
 	
+	@RequestMapping(method = RequestMethod.GET
+            ,value = "/queryStockInfo"
+            ,produces = "application/json")
+	public ResponseEntity<GeneralResponse> queryStockInfo(@RequestParam(name = "page") int page,
+                                                          @RequestParam(name = "size") int size,
+                                                          @RequestParam(name = "sort") String sort,
+                                                          @RequestParam(name = "order") String order) {
+        try {
+            return ResponseEntity.ok(GeneralResponse.builder()
+                    .setStatus("success")
+                    .setMessage("查詢成功")
+                    .setData(stockService.getStockByPageWithSort(page, size, sort, order))
+                    .build());
+        }catch(Exception e) {
+            return ResponseEntity.internalServerError()
+                    .body(GeneralResponse.builder()
+                            .setError(e.getMessage())
+                            .setStatus("failed")
+                            .setMessage("查詢失敗")
+                            .build());
+        }
+		
+	}
+	
 	
 }

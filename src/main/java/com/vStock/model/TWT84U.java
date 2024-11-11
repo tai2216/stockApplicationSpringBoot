@@ -37,39 +37,39 @@ public class TWT84U {
 	private int id;
 	
 	@JsonProperty("Code")
-	@Column(name = "code",columnDefinition = "varchar(10)",unique = true)
+	@Column(name = "code",columnDefinition = "varchar(6)",unique = true)
 	private String code;
 	
 	@JsonProperty("Name")
-	@Column(name = "name",columnDefinition = "varchar(50)",unique = true)
+	@Column(name = "name",columnDefinition = "varchar(20)",unique = true)
 	private String name;
 	
 	@JsonProperty("TodayLimitUp")
-	@Column(name = "today_limit_up",columnDefinition = "varchar(10)")
+	@Column(name = "today_limit_up",columnDefinition = "varchar(5)")
 	private String todayLimitUp;
 	
 	@JsonProperty("TodayOpeningRefPrice")
-	@Column(name = "today_opening_ref_price",columnDefinition = "varchar(10)")
+	@Column(name = "today_opening_ref_price",columnDefinition = "varchar(5)")
 	private String todayOpeningRefPrice;
 	
 	@JsonProperty("TodayLimitDown")
-	@Column(name = "today_limit_down",columnDefinition = "varchar(10)")
+	@Column(name = "today_limit_down",columnDefinition = "varchar(5)")
 	private String todayLimitDown;
 	
 	@JsonProperty("PreviousDayOpeningRefPrice")
-	@Column(name = "previous_day_opening_ref_price",columnDefinition = "varchar(10)")
+	@Column(name = "previous_day_opening_ref_price",columnDefinition = "varchar(5)")
 	private String previousDayOpeningRefPrice;
 	
 	@JsonProperty("PreviousDayPrice")
-	@Column(name = "previous_day_price",columnDefinition = "varchar(10)")
+	@Column(name = "previous_day_price",columnDefinition = "varchar(5)")
 	private String previousDayPrice;
 	
 	@JsonProperty("PreviousDayLimitUp")
-	@Column(name = "previous_day_limit_up",columnDefinition = "varchar(10)")
+	@Column(name = "previous_day_limit_up",columnDefinition = "varchar(5)")
 	private String previousDayLimitUp;
 	
 	@JsonProperty("PreviousDayLimitDown")
-	@Column(name = "previous_day_limit_down",columnDefinition = "varchar(10)")
+	@Column(name = "previous_day_limit_down",columnDefinition = "varchar(5)")
 	private String previousDayLimitDown;
 	
 	@JsonProperty("LastTradingDay")
@@ -77,7 +77,7 @@ public class TWT84U {
 	private String lastTradingDay;
 	
 	@JsonProperty("AllowOddLotTrade")
-	@Column(name = "allow_odd_lot_trade",columnDefinition = "varchar(5)")
+	@Column(name = "allow_odd_lot_trade",columnDefinition = "varchar(4)")
 	private String allowOddLotTrade;
 	
 

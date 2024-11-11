@@ -2,9 +2,11 @@
 package com.vStock.controller;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import java.io.UnsupportedEncodingException;
 import java.util.Date;
 
 import org.junit.jupiter.api.MethodOrderer.OrderAnnotation;
@@ -34,7 +36,7 @@ public class StockControllerTest {
 	@Autowired
 	private JwtSecretKeyDao jwtSecretKeyDao;
 	
-	private static String latestStockDay = "1131106";
+	private static String latestStockDay = "1131107";
 	
     private String generateJwtToken() {
 //		String jwtSecretkey = (String) ((Map<String,Object>)env.getPropertySources().get("jwtProperties").getSource()).get("jwtSecretKey");
@@ -139,5 +141,52 @@ public class StockControllerTest {
     	.getWriter().println();
     }
     
+
+//    @Test
+//    @Order(7)
+//    void testQueryStockInfoFail1() throws UnsupportedEncodingException, Exception {
+//    	mockMvc.perform(addJwtToken(get("/queryStockInfo")
+//    			.param("page", "-1")
+//    			.param("size", "30")
+//    			.param("sort", "LastTradingDay")
+//    			.param("order", "asc")))
+//    	.andExpect(status().isInternalServerError())
+//    	.andExpect(jsonPath("$.error").value("Page index must not be less than zero!"))
+//    	.andReturn()
+//    	.getResponse()
+//    	.getWriter()
+//    	.println();
+//    }
+//    @Test
+//    @Order(8)
+//    void testQueryStockInfoFail2() throws UnsupportedEncodingException, Exception {
+//    	mockMvc.perform(addJwtToken(get("/queryStockInfo")
+//    			.param("page", "1")
+//    			.param("size", "-30")
+//    			.param("sort", "LastTradingDay")
+//    			.param("order", "asc")))
+//    	.andExpect(status().isInternalServerError())
+//    	.andExpect(jsonPath("$.error").value("Page size must not be less than one!"))
+//    	.andReturn()
+//    	.getResponse()
+//    	.getWriter()
+//    	.println();
+//    }
+//    
+//    @Test
+//    @Order(9)
+//    void testQueryStockInfoSuccess() throws UnsupportedEncodingException, Exception {
+//    	mockMvc.perform(addJwtToken(get("/queryStockInfo")
+//    			.param("page", "1")
+//    			.param("size", "30")
+//    			.param("sort", "LastTradingDay")
+//    			.param("order", "asc")))
+//    			.andExpect(status().isOk())
+//    			.andExpect(jsonPath("$.data").hasJsonPath())
+//    			.andReturn()
+//    			.getResponse()
+//    			.getWriter()
+//    			.println();
+//    }
     
 }

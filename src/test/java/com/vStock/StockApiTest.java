@@ -41,33 +41,43 @@ public class StockApiTest {
 	@Autowired
 	private Twt84uDao twt84uDao;
 	
-	@Test
-	@Order(1)
-//	@Transactional
-	void getStockInfo() {
-		try {
-			System.out.println("呼叫api");
-			ObjectMapper mapper = new ObjectMapper();
-			String result = stockService.getStockInfo();
-			List<TWT84U> table = mapper.readValue(result, new TypeReference<List<TWT84U>>() {});
-			twt84uDao.saveAll(table);
-			twt84uDao.flush();
-			System.out.println("已存入資料庫");
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-	}
-	
-	@Test
-	@Order(2)
-	void saveApiDataToExcel() {
-		stockService.saveApiDataToExcel();
-	}
+//	@Test
+//	@Order(1)
+////	@Transactional
+//	void getStockInfo() {
+//		try {
+//			System.out.println("呼叫api");
+//			ObjectMapper mapper = new ObjectMapper();
+//			String result = stockService.getStockInfo();
+//			List<TWT84U> table = mapper.readValue(result, new TypeReference<List<TWT84U>>() {});
+//			twt84uDao.saveAll(table);
+//			twt84uDao.flush();
+//			System.out.println("已存入資料庫");
+//		} catch (Exception e) {
+//			e.printStackTrace();
+//		}
+//	}
+//	
+//	@Test
+//	@Order(2)
+//	void saveApiDataToExcel() {
+//		stockService.saveApiDataToExcel();
+//	}
 	
 //	@Test
 //	@Order(3)
 //	void buyOrSellStock() {
 //		stockService.buyOrSellStock(TransactionType.BUY, 1, 1000, "0050", "1131104");
 //	}
+	
+	@Test
+	@Order(4)
+	void testQueryWithPageObject() throws JsonProcessingException {
+		ObjectMapper objectMapper = new ObjectMapper();
+		String json = objectMapper.writeValueAsString(stockService.getStockByPageWithSort(1, 30, "lasttradingday", "asc"));
+		System.out.println("json:");
+		System.out.println(json);
+		System.out.println();
+	}
 	
 }
