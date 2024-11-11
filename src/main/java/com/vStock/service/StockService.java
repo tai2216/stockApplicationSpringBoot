@@ -23,6 +23,7 @@ import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
@@ -75,6 +76,9 @@ public class StockService {
 	@Autowired
 	private StockHoldingDetailsDao stockHoldingDetailsDao;
 	
+	@Value("${spring.mail.username}")
+	private String developerEmail;
+	
 	private String[] columnNameArray = {
 			"Code", "Name", "TodayLimitUp", "TodayOpeningRefPrice", "TodayLimitDown", "PreviousDayOpeningRefPrice",
 			"PreviousDayPrice", "PreviousDayLimitUp", "PreviousDayLimitDown", "LastTradingDay",
@@ -88,6 +92,7 @@ public class StockService {
 		}
 		this.saveApiDataToExcel();//保存歷史資料到excel,目前還無使用規劃但先保存
 //		this.testSchedule();
+//		todo:要加入每日排程去察看當日註冊的使用者帳號沒有啟用的應全部刪除以避免過多無效帳號
 	}
 	
 	@Scheduled(fixedRate = 8,timeUnit = TimeUnit.HOURS,zone = "Asia/Taipei")
@@ -364,7 +369,7 @@ public class StockService {
 		}catch(Exception e) {
 //			e.printStackTrace();
 			logger.error("交易失敗", e.getMessage());
-			throw new RuntimeException("交易失敗: "+ e.getMessage());
+			throw new RuntimeException("交易失敗，請洽詢網站管理者或來信至"+developerEmail);
 		}
 	}
 	

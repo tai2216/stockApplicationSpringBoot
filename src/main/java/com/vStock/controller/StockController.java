@@ -37,7 +37,8 @@ public class StockController {
 					.body(GeneralResponse.builder()
 										.setError(e.getMessage())
 										.setStatus("failed")
-										.setMessage("交易失敗")
+//										.setMessage("交易失敗")
+										.setMessage(e.getMessage())
 										.build());
 		}
 		
@@ -61,7 +62,8 @@ public class StockController {
 					.body(GeneralResponse.builder()
 							.setError(e.getMessage())
 							.setStatus("failed")
-							.setMessage("交易失敗")
+//							.setMessage("交易失敗")
+							.setMessage(e.getMessage())
 							.build());
 		}
 		
@@ -85,7 +87,8 @@ public class StockController {
                     .body(GeneralResponse.builder()
                             .setError(e.getMessage())
                             .setStatus("failed")
-                            .setMessage("查詢失敗")
+//                            .setMessage("查詢失敗")
+                            .setMessage(e.getMessage())
                             .build());
         }
 		

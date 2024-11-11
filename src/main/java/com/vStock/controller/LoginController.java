@@ -27,14 +27,13 @@ public class LoginController {
 		if (authResult != null) {
 			return ResponseEntity.status(403).body(LoginResponse.builder().message(authResult).build());
 		}
-		normalUserService.updateLoginDate(req.getParameter("username"));
-		ResponseEntity<LoginResponse> success = ResponseEntity.ok(
+		normalUserService.updateLoginDate(res.getHeader("loginUserName"));
+        return ResponseEntity.ok(
 				LoginResponse.builder().username(res.getHeader("loginUserName"))
-							       		 .role(res.getHeader("role"))
-							       		 .token(res.getHeader("Authorization"))
-							       		 .message("Log In Success")
-							       		 .build());
-        return success;
+				.role(res.getHeader("role"))
+				.token(res.getHeader("Authorization"))
+				.message("Log In Success")
+				.build());
 	}
 	
 	

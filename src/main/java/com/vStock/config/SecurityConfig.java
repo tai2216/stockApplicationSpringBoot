@@ -25,17 +25,13 @@ import com.vStock.model.JwtSecretKey;
 @EnableWebSecurity
 public class SecurityConfig extends WebSecurityConfigurerAdapter{
 	
-//	@Autowired
-//	private UsersDetailServiceImpl service;
-	
+
 	@Autowired
 	private JwtSecretKeyDao jwtSecretKeyDao;
 	
 	@Autowired
 	private UserDetailsService service;
 
-//	@Autowired
-//	private CorsFilter corsFilter;
 	@Override
 	protected void configure(HttpSecurity http) throws Exception {
 		try {

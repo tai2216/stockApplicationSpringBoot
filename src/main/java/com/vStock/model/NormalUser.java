@@ -62,7 +62,7 @@ public class NormalUser {
 	
 	@Column(name = "PHONE",columnDefinition = "NVARCHAR(50)")
 	@ColumnDefault(value = "'0917648234'")
-	private String phone;
+	private String phone;//還不確定需不需要這個欄位目前暫時保留
 	
 	@Column(name = "ENABLED",columnDefinition = "BIT")
 	@ColumnDefault(value = "0")

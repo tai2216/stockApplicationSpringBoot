@@ -1,11 +1,13 @@
 package com.vStock.controller;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-import org.junit.jupiter.api.BeforeEach;
+import java.util.HashMap;
+import java.util.Map;
+
 import org.junit.jupiter.api.MethodOrderer.OrderAnnotation;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
@@ -13,15 +15,8 @@ import org.junit.jupiter.api.TestMethodOrder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-
-import com.vStock.dao.NormalUserDao;
-import com.vStock.service.JavaMailService;
-import com.vStock.service.impl.NormalUserServiceImpl;
-import com.vStock.service.impl.UsersDetailServiceImpl;
 
 //@SpringBootTest(classes={LoginController.class})
 @SpringBootTest
@@ -63,12 +58,11 @@ public class LoginControllerTest {
     public void testLoginControllerFail() throws Exception {
     	String username = "testuser";
     	String password = "QQ123";
-    	
     	// Perform the request and verify the response
     	mockMvc.perform(post("/login")
-    			.contentType(MediaType.APPLICATION_FORM_URLENCODED)
-//    			.content("{\"username\":\"" + username + "\", \"password\":\"" + password + "\"}"))
-    	.content("username="+username+"&"+"password="+password))
+    			.contentType(MediaType.APPLICATION_JSON)
+    			.content("{\"username\":\"" + username + "\", \"password\":\"" + password + "\"}"))
+//    	.content("{username:"+username+","+"password:"+password+"}"))
     	.andExpect(status().is(403))
 //    	.andExpect(jsonPath("$.status").value("error"))
     	.andExpect(header().string("Log In Error", "Bad credentials"));
@@ -83,9 +77,11 @@ public class LoginControllerTest {
 
         // Perform the request and verify the response
         mockMvc.perform(post("/login")
-                .contentType(MediaType.APPLICATION_FORM_URLENCODED)
-//                .content("{\"username\":\"" + username + "\", \"password\":\"" + password + "\"}"))
-                .content("username="+username+"&"+"password="+password))
+//                .contentType(MediaType.APPLICATION_FORM_URLENCODED)
+        		  .contentType(MediaType.APPLICATION_JSON)
+                .content("{\"username\":\"" + username + "\", \"password\":\"" + password + "\"}"))
+//                .content("username="+username+"&"+"password="+password))
+//    			.content("{username:"+username+","+"password:"+password+"}"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.username").value("testuser"))
                 .andExpect(jsonPath("$.token").isNotEmpty())

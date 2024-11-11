@@ -21,6 +21,7 @@ public class RegistrationController {
 	
 	@RequestMapping(value = "/register"
 			,method = { RequestMethod.POST}
+			, consumes = "application/json"
 			, produces = "application/json")
 	public ResponseEntity<GeneralResponse> registerUser(HttpServletRequest req, HttpServletResponse res) {
 		try {
@@ -28,13 +29,14 @@ public class RegistrationController {
 		}catch(Exception e) {
 			return ResponseEntity.internalServerError()
 					.body(GeneralResponse.builder()
-							.setMessage("註冊失敗，請稍後再試")
+//							.setMessage("註冊失敗，請稍後再試")
+							.setMessage(e.getMessage())
 							.setStatus("error")
 							.setError(e.getMessage())
 							.build());
 		}
 		return ResponseEntity.ok(GeneralResponse.builder()
-				.setMessage("註冊成功，請至信箱查看確認信件以啟用帳號")
+				.setMessage("註冊成功，請於今日結束之前至信箱查看確認信件以啟用帳號")
 				.setStatus("success")
 				.build());
 	}
@@ -50,7 +52,8 @@ public class RegistrationController {
 		} catch (Exception e) {
 			return ResponseEntity.internalServerError()
 					.body(GeneralResponse.builder()
-							.setMessage("啟用失敗，請稍後再試")
+//							.setMessage("啟用失敗，請稍後再試")
+							.setMessage(e.getMessage())
 							.setStatus("error")
 							.setError(e.getMessage())
 							.build());

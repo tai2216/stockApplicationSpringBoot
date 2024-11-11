@@ -18,7 +18,10 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
+import com.fasterxml.jackson.core.exc.StreamReadException;
+import com.fasterxml.jackson.databind.DatabindException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.vStock.json.LoginJson;
 
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
@@ -28,6 +31,8 @@ public class JWTLoginFilter extends UsernamePasswordAuthenticationFilter{
 	private AuthenticationManager authenticationManager;
 	
 	private String jwtSecretKey;
+	
+	private final ObjectMapper objectMapper = new ObjectMapper();
 	
 	public JWTLoginFilter (AuthenticationManager authenticationManager, String jwtSecretKey) {
 		super(authenticationManager);
@@ -48,12 +53,22 @@ public class JWTLoginFilter extends UsernamePasswordAuthenticationFilter{
 		logger.debug("req content length: "+request.getContentLength());
 		logger.debug("User Name: "+request.getParameter("username"));
 		logger.debug("Password: "+request.getParameter("password"));
-
+		LoginJson loginJson = null;
+		try {
+//			loginJson = objectMapper.readValue(request.getReader().lines().reduce(new String(),String::concat), LoginJson.class);
+			loginJson = objectMapper.readValue(request.getReader(), LoginJson.class);
+		} catch (Exception e) {
+			e.printStackTrace();
+			logger.error("登入資訊有誤: "+e.getMessage());
+		}
+		if(loginJson==null) {
+			throw new RuntimeException("Log in Json parse error");
+		}
 		try {	
 		    Authentication authenticate = authenticationManager.authenticate(
 										    new UsernamePasswordAuthenticationToken(
-										    request.getParameter("username"),
-										    request.getParameter("password"),
+										    loginJson.getUsername(),
+										    loginJson.getPassword(),
 										       new ArrayList<>())
 			);
 		    logger.debug("getName: "+authenticate.getName());

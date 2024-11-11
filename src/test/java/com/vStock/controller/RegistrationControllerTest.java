@@ -22,6 +22,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
@@ -60,17 +61,23 @@ public class RegistrationControllerTest {
 //                .build();
 ////        MockitoAnnotations.openMocks(this);
 //    }
-
+	String username = "";
+	String password = "";
+	String email = "";
     @Test
     @Order(1)
     public void testRegisterUser_Failure() throws Exception {
     	System.out.println("執行註冊使用者失敗案例");
 //        doThrow(new RuntimeException("Simulated error")).when(normalUserService).registerUser(any(HttpServletRequest.class), any(HttpServletResponse.class));
-
+    	username = "testuser";
+    	password = "QQ123";
+    	email = "1234";
         mockMvc.perform(post("/register")
-                .param("username", "testuser2")
-                .param("password", "password2")
-                .param("email", "1234"))
+        		.contentType(MediaType.APPLICATION_JSON)
+        		.content("{\"username\":\"" + username + "\", \"password\":\"" + password + "\", \"email\":\"" + email + "\"}"))
+//                .param("username", "testuser2")
+//                .param("password", "password2")
+//                .param("email", "1234"))
                 .andExpect(status().isInternalServerError())
                 .andExpect(jsonPath("$.message").value("註冊失敗，請稍後再試"))
                 .andExpect(jsonPath("$.status").value("error"));
@@ -82,11 +89,15 @@ public class RegistrationControllerTest {
     public void testRegisterUser_Success() throws Exception {
     	System.out.println("執行註冊使用者成功案例");
 //        doNothing().when(normalUserService).registerUser(any(HttpServletRequest.class), any(HttpServletResponse.class));
-        
+    	username = "testuser";
+    	password = "password";
+    	email = "sam.tian@frog-jump.com";
         mockMvc.perform(post("/register")
-                .param("username", "testuser")
-                .param("password", "password")
-                .param("email", "sam.tian@frog-jump.com"))
+        		.contentType(MediaType.APPLICATION_JSON)
+        		.content("{\"username\":\"" + username + "\", \"password\":\"" + password + "\", \"email\":\"" + email + "\"}"))
+//                .param("username", "testuser")
+//                .param("password", "password")
+//                .param("email", "sam.tian@frog-jump.com"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.message").value("註冊成功，請至信箱查看確認信件以啟用帳號"))
                 .andExpect(jsonPath("$.status").value("success"));

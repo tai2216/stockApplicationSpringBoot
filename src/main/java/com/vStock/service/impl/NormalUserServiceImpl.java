@@ -17,8 +17,10 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vStock.dao.MoneyAccountDao;
 import com.vStock.dao.NormalUserDao;
+import com.vStock.json.LoginJson;
 import com.vStock.model.MoneyAccount;
 import com.vStock.model.NormalUser;
 import com.vStock.service.JavaMailService;
@@ -40,13 +42,24 @@ public class NormalUserServiceImpl implements NormalUserService{
 	
 	@Autowired
 	private JavaMailService mailService;
+	
+	@Autowired
+	private ObjectMapper objectMapper;
 
 	@Transactional
 	public void registerUser(HttpServletRequest req, HttpServletResponse res) {
 		try {
-			String username = req.getParameter("username");
-			String password = new BCryptPasswordEncoder().encode(req.getParameter("password"));
-			String email = req.getParameter("email");
+			LoginJson loginJson = null;
+			try {
+				loginJson = objectMapper.readValue(req.getReader(), LoginJson.class);
+			} catch (Exception e) {
+				e.printStackTrace();
+				logger.error("註冊資訊有誤: "+e.getMessage());
+				throw new RuntimeException("註冊資訊有誤: ");
+			}
+			String username = loginJson.getUsername();
+			String password = new BCryptPasswordEncoder().encode(loginJson.getPassword());
+			String email = loginJson.getEmail();
 			if (normalUserDao.findByUsername(username).isPresent()) {
 				throw new RuntimeException("此帳號已被註冊");
 			}
@@ -74,10 +87,10 @@ public class NormalUserServiceImpl implements NormalUserService{
 			mailService.sendMail(Arrays.asList(receivers), subject, htmlContent);
 		}catch(MessagingException me) {
 			logger.error("啟用信件寄件錯誤",me.getMessage());
-			throw new RuntimeException(me);
+			throw new RuntimeException("啟用信件寄件錯誤");
 		}catch(Exception e) {
 			logger.error("註冊失敗",e.getMessage());
-			throw new RuntimeException(e);
+			throw new RuntimeException("註冊失敗");
 		}
 	}
 
