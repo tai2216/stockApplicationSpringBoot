@@ -25,7 +25,9 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
@@ -142,6 +144,7 @@ public class StockService {
 		return twt84uDao.findAll(of);
 		
 	}
+	
 	public Page<TWT84U> getStockByPageWithSort(int page, int size, @NotEmpty String columnName, String ascOrDesc){
 		if(!StringUtils.hasText(ascOrDesc)) {
 			ascOrDesc = "asc";//若這個參數有問題則預設給asc排序
@@ -156,6 +159,15 @@ public class StockService {
 			of = PageRequest.of(page,size, Sort.by(columnName).ascending());
 		}
 		return twt84uDao.findAll(of);
+	}
+	
+	public Page<TWT84U> searchForStock(String keyWord){
+		if (!StringUtils.hasText(keyWord)) {
+			throw new RuntimeException("搜尋關鍵字不可為空");
+		}
+		List<TWT84U> result = twt84uDao.findByCodeOrName(keyWord);
+		Pageable pageable = PageRequest.of(0, 15,Sort.by("Code").ascending());
+		return new PageImpl<>(result,pageable,result.size());
 	}
 	
 	/*

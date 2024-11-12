@@ -118,10 +118,11 @@ public class NormalUserServiceImpl implements NormalUserService{
 		if(!StringUtils.hasText(username) | !StringUtils.hasText(remark)) {
 			throw new RuntimeException("非正常的啟用請求");
 		}
+		user = normalUserDao.findByUsername(username);
+		if (user.isPresent() && user.get().isEnabled()) {
+			throw new RuntimeException("此帳號已啟用");
+		}
 		if ((user = normalUserDao.findByUsernameAndRemark(username,remark)).isPresent()) {
-			if (user.get().isEnabled()) {
-				throw new RuntimeException("此帳號已啟用");
-			}
 			int id = user.get().getId();
 			try {
 				normalUserDao.enableUser(id, Timestamp.from(java.time.Instant.now()));

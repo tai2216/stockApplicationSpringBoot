@@ -1,5 +1,6 @@
 package com.vStock.dao;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -17,6 +18,11 @@ public interface Twt84uDao extends JpaRepository<TWT84U, Integer>, PagingAndSort
 			, value = "SELECT * FROM TWT84U WHERE CODE = :stockCode")
 	@Transactional(readOnly = true)
 	public Optional<TWT84U> findByStockCode(String stockCode);
+	
+	@Query(nativeQuery = true
+			, value = "SELECT * FROM TWT84U WHERE CODE LIKE CONCAT('%',:keyWord,'%') OR NAME LIKE CONCAT('%',:keyWord,'%')")
+	@Transactional(readOnly = true)
+	public List<TWT84U> findByCodeOrName(String keyWord);
 	
 	@Query(nativeQuery = true
 			, value = "SELECT DISTINCT NAME FROM TWT84U WHERE CODE = :code")

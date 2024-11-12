@@ -37,8 +37,7 @@ public class StockController {
 					.body(GeneralResponse.builder()
 										.setError(e.getMessage())
 										.setStatus("failed")
-//										.setMessage("交易失敗")
-										.setMessage(e.getMessage())
+										.setMessage("交易失敗")
 										.build());
 		}
 		
@@ -62,8 +61,7 @@ public class StockController {
 					.body(GeneralResponse.builder()
 							.setError(e.getMessage())
 							.setStatus("failed")
-//							.setMessage("交易失敗")
-							.setMessage(e.getMessage())
+							.setMessage("交易失敗")
 							.build());
 		}
 		
@@ -87,10 +85,29 @@ public class StockController {
                     .body(GeneralResponse.builder()
                             .setError(e.getMessage())
                             .setStatus("failed")
-//                            .setMessage("查詢失敗")
-                            .setMessage(e.getMessage())
+                            .setMessage("查詢失敗")
                             .build());
         }
+		
+	}
+	@RequestMapping(method = RequestMethod.GET
+			,value = "/searchStock"
+			,produces = "application/json")
+	public ResponseEntity<GeneralResponse> searchStock(@RequestParam(name = "keyWord")String keyWord) {
+		try {
+			return ResponseEntity.ok(GeneralResponse.builder()
+					.setStatus("success")
+					.setMessage("查詢成功")
+					.setData(stockService.searchForStock(keyWord))
+					.build());
+		}catch(Exception e) {
+			return ResponseEntity.internalServerError()
+					.body(GeneralResponse.builder()
+							.setError(e.getMessage())
+							.setStatus("failed")
+                            .setMessage("查詢失敗")
+							.build());
+		}
 		
 	}
 	

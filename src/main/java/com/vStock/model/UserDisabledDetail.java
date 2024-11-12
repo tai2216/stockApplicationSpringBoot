@@ -1,6 +1,6 @@
 package com.vStock.model;
 
-import java.sql.Date;
+import java.sql.Timestamp;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -40,8 +40,8 @@ public class UserDisabledDetail {
 	private String disabledReason;
 	
 	@DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-	@Column(name = "DISABLED_DATE")
-	private Date disabledDate;
+	@Column(name = "DISABLED_DATE",columnDefinition = "SMALLDATETIME")
+	private Timestamp disabledDate;
 	
 	@Column(name = "ERROR_LOG")
 	private String errorLog;
@@ -50,8 +50,8 @@ public class UserDisabledDetail {
 	private String enabledReason;
 	
 	@DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-	@Column(name = "ENABLED_DATE")
-	private Date enabledDate;
+	@Column(name = "ENABLED_DATE",columnDefinition = "SMALLDATETIME")
+	private Timestamp enabledDate;
 	
 	@ManyToOne(targetEntity = NormalUser.class
 			,optional = true)
