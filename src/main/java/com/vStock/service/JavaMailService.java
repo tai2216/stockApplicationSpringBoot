@@ -26,21 +26,6 @@ public class JavaMailService {
 	@Value("${spring.mail.username}")
 	private String developerEmail;
 	
-    private boolean isValidEmail(String email) {
-        return EmailValidator.getInstance().isValid(email);
-    }
-    
-    private Collection<String> filterEmail(Collection<String> receivers){
-    	Collection<String> validReceivers = receivers.stream()
-											        .filter(this::isValidEmail)
-											        .collect(Collectors.toList());
-		if (validReceivers.isEmpty()) {
-		    throw new RuntimeException("無效的電子信箱");
-		}else {
-			return validReceivers;
-		}
-    }
-	
 	public void sendMail(Collection<String> receivers, String subject, String content) throws MessagingException {
 		try {
 	        Collection<String> validReceivers = filterEmail(receivers);
@@ -83,6 +68,19 @@ public class JavaMailService {
 	}
 	
 	
-	
+    private boolean isValidEmail(String email) {
+        return EmailValidator.getInstance().isValid(email);
+    }
+    
+    private Collection<String> filterEmail(Collection<String> receivers){
+    	Collection<String> validReceivers = receivers.stream()
+											        .filter(this::isValidEmail)
+											        .collect(Collectors.toList());
+		if (validReceivers.isEmpty()) {
+		    throw new RuntimeException("無效的電子信箱");
+		}else {
+			return validReceivers;
+		}
+    }
 	
 }

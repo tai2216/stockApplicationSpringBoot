@@ -19,6 +19,11 @@ public interface NormalUserDao extends JpaRepository<NormalUser, Integer>{
 	public Optional<NormalUser> findByUsername(String username);
 	
 	@Query(nativeQuery = true
+			,value="SELECT * FROM NORMAL_USER WHERE USERNAME = :username AND REMARK = :remark")
+	@Transactional(readOnly = true)
+	public Optional<NormalUser> findByUsernameAndRemark(String username,String remark);
+	
+	@Query(nativeQuery = true
 			, value = "UPDATE NORMAL_USER SET ENABLED = 1, ENABLED_DATE =:date WHERE USER_ID = :id")
 	@Modifying(clearAutomatically = true, flushAutomatically = true)
 	public void enableUser(int id, Date date);

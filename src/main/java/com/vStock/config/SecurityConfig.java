@@ -1,9 +1,5 @@
 package com.vStock.config;
 
-import java.security.SecureRandom;
-import java.util.Base64;
-import java.util.Random;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -19,6 +15,7 @@ import com.vStock.config.filter.JWTAuthenticationFilter;
 import com.vStock.config.filter.JWTLoginFilter;
 import com.vStock.dao.JwtSecretKeyDao;
 import com.vStock.model.JwtSecretKey;
+import com.vStock.util.KeyUtils;
 
 //繼承 WebSecurityConfigurerAdapter才可自訂登入邏輯
 @Configuration
@@ -35,14 +32,24 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter{
 	@Override
 	protected void configure(HttpSecurity http) throws Exception {
 		try {
-			//每次啟動應用都會重新生成一組jwtSecretKey並存入資料庫
+			//每次啟動應用都會重新生成一組jwtSecretKey並存入資料庫提供測試時使用
 			jwtSecretKeyDao.deleteAll();
 			jwtSecretKeyDao.flush();
-			jwtSecretKeyDao.save(JwtSecretKey.builder().id(1).jwtKey(generateRandomKey(new Random().nextInt(100,200))).build());
-			String jwtSecretkey = jwtSecretKeyDao.findAll().get(0).getJwtKey();
+			String jwtSecretkey = KeyUtils.generateKey(50, 200);
+			jwtSecretKeyDao.save(JwtSecretKey.builder()
+											.id(1)
+											.jwtKey(jwtSecretkey)
+											.build());
 			http
 			.authorizeRequests()
-			.antMatchers("/login","/checkLogin","/oauth2/authorization/google","/register","/enableUser")
+//			The pattern /enableUser(\\?.*)? is a regular expression used to match the /enableUser path with optional query parameters. Here's a breakdown of the pattern:
+//			/enableUser: Matches the exact path /enableUser.
+//			(\\?.*)?: Matches an optional query string.
+//			\\?: Matches the literal ? character (escaped with double backslashes).
+//			.*: Matches any character (.) zero or more times (*).
+//			?: Makes the preceding group (\?.*) optional.
+//			.antMatchers("/login","/checkLogin","/oauth2/authorization/google","/register","/enableUser(\\?.*)?")
+			.regexMatchers("/login","/checkLogin","/oauth2/authorization/google","/register","/enableUser/(\\?.*)?")
 			.permitAll()
 			.antMatchers("/css/**/**","/images/**/**","/js/**","/default/**","/layout/**","/img/**","/Message/**")
 			.permitAll()
@@ -131,14 +138,6 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter{
 //    	return service;
 //    }
 	
-	/*
-	 * 動態生成Jwt Token的Secret Key
-	 * */
-    public static String generateRandomKey(int length) {
-        SecureRandom secureRandom = new SecureRandom();
-        byte[] key = new byte[length];
-        secureRandom.nextBytes(key);
-        return Base64.getEncoder().encodeToString(key);
-    }
+
 
 }

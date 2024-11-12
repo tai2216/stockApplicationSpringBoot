@@ -7,7 +7,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.vStock.model.GeneralResponse;
@@ -44,11 +43,10 @@ public class RegistrationController {
 	@RequestMapping(value = "/enableUser"
 			, method = { RequestMethod.GET }
 			, produces = "application/json")
-	public ResponseEntity<GeneralResponse> enableUser(@RequestParam(name = "username") String username
-													, HttpServletRequest req
+	public ResponseEntity<GeneralResponse> enableUser(HttpServletRequest req
 													, HttpServletResponse res) {
 		try {
-			normalUserService.enableUser(username, req, res);
+			normalUserService.enableUser(req, res);
 		} catch (Exception e) {
 			return ResponseEntity.internalServerError()
 					.body(GeneralResponse.builder()

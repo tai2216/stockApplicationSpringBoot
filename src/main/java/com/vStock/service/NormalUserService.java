@@ -7,7 +7,7 @@ public interface NormalUserService {
 	
 	public void registerUser(HttpServletRequest req, HttpServletResponse res);
 	
-	public void enableUser(String username,HttpServletRequest req, HttpServletResponse res);
+	public void enableUser(HttpServletRequest req, HttpServletResponse res);
 	
 	public void updateLoginDate(String username);
 

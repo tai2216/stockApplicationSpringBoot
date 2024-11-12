@@ -16,6 +16,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vStock.dao.MoneyAccountDao;
@@ -25,6 +26,7 @@ import com.vStock.model.MoneyAccount;
 import com.vStock.model.NormalUser;
 import com.vStock.service.JavaMailService;
 import com.vStock.service.NormalUserService;
+import com.vStock.util.KeyUtils;
 
 @Service
 public class NormalUserServiceImpl implements NormalUserService{
@@ -55,11 +57,13 @@ public class NormalUserServiceImpl implements NormalUserService{
 			} catch (Exception e) {
 				e.printStackTrace();
 				logger.error("註冊資訊有誤: "+e.getMessage());
-				throw new RuntimeException("註冊資訊有誤: ");
+				throw new RuntimeException("註冊資訊有誤");
 			}
 			String username = loginJson.getUsername();
 			String password = new BCryptPasswordEncoder().encode(loginJson.getPassword());
 			String email = loginJson.getEmail();
+			//用來啟用帳號時驗證用，避免使用者可直接繞過信箱驗證直接啟用帳號
+			String remark = KeyUtils.generateKey(10,30);
 			if (normalUserDao.findByUsername(username).isPresent()) {
 				throw new RuntimeException("此帳號已被註冊");
 			}
@@ -71,6 +75,7 @@ public class NormalUserServiceImpl implements NormalUserService{
 					.setPassword(password)
 					.setEmail(email)
 					.setRegisterDate(new Date(System.currentTimeMillis()))
+					.setRemark(remark)
 					.build();
 			normalUserDao.save(user);
 			
@@ -83,7 +88,7 @@ public class NormalUserServiceImpl implements NormalUserService{
 		    String subject = "[註冊成功] 請點擊信件連結以啟用帳號";
 		    String htmlContent = "<h1>您已成功註冊 Stock Market Simulation!</h1>"
 		            + "<p>請點擊以下連結以啟用帳號:</p>"
-		            + "<a href="+urlPrefix+"enableUser/?username="+username+">啟用帳號</a>";
+		            + "<a href="+urlPrefix+"enableUser/?username="+username+"&remark="+remark+">啟用帳號</a>";
 			mailService.sendMail(Arrays.asList(receivers), subject, htmlContent);
 		}catch(MessagingException me) {
 			logger.error("啟用信件寄件錯誤",me.getMessage());
@@ -94,10 +99,16 @@ public class NormalUserServiceImpl implements NormalUserService{
 		}
 	}
 
+	//todo:須想辦法避免繞開email送信失敗的情況下仍然可以透過這個api直接解鎖帳號
 	@Transactional
-	public void enableUser(String username, HttpServletRequest req, HttpServletResponse res) {
+	public void enableUser(HttpServletRequest req, HttpServletResponse res) {
 		Optional<NormalUser> user = null;
-		if ((user = normalUserDao.findByUsername(username)).isPresent()) {
+		String username = req.getParameter("username");
+		String remark = req.getParameter("remark");
+		if(!StringUtils.hasText(username) | !StringUtils.hasText(remark)) {
+			throw new RuntimeException("非正常的啟用請求");
+		}
+		if ((user = normalUserDao.findByUsernameAndRemark(username,remark)).isPresent()) {
 			if (user.get().isEnabled()) {
 				throw new RuntimeException("此帳號已啟用");
 			}

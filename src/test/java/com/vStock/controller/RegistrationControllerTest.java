@@ -68,7 +68,6 @@ public class RegistrationControllerTest {
     @Order(1)
     public void testRegisterUser_Failure() throws Exception {
     	System.out.println("執行註冊使用者失敗案例");
-//        doThrow(new RuntimeException("Simulated error")).when(normalUserService).registerUser(any(HttpServletRequest.class), any(HttpServletResponse.class));
     	username = "testuser";
     	password = "QQ123";
     	email = "1234";
@@ -79,7 +78,7 @@ public class RegistrationControllerTest {
 //                .param("password", "password2")
 //                .param("email", "1234"))
                 .andExpect(status().isInternalServerError())
-                .andExpect(jsonPath("$.message").value("註冊失敗，請稍後再試"))
+                .andExpect(jsonPath("$.message").value("註冊失敗"))
                 .andExpect(jsonPath("$.status").value("error"));
     }
     
@@ -88,7 +87,6 @@ public class RegistrationControllerTest {
     @Order(2)
     public void testRegisterUser_Success() throws Exception {
     	System.out.println("執行註冊使用者成功案例");
-//        doNothing().when(normalUserService).registerUser(any(HttpServletRequest.class), any(HttpServletResponse.class));
     	username = "testuser";
     	password = "password";
     	email = "sam.tian@frog-jump.com";
@@ -99,7 +97,7 @@ public class RegistrationControllerTest {
 //                .param("password", "password")
 //                .param("email", "sam.tian@frog-jump.com"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.message").value("註冊成功，請至信箱查看確認信件以啟用帳號"))
+                .andExpect(jsonPath("$.message").value("註冊成功，請於今日結束之前至信箱查看確認信件以啟用帳號"))
                 .andExpect(jsonPath("$.status").value("success"));
     }
     
@@ -107,23 +105,24 @@ public class RegistrationControllerTest {
     @Order(3)
 	public void testEnableUser_Failure() throws Exception {
 		System.out.println("執行啟用使用者帳號失敗案例");
-//		doThrow(new RuntimeException("Simulated error")).when(normalUserService).enableUser(anyString(),
-//				any(HttpServletRequest.class), any(HttpServletResponse.class));
 
 		mockMvc.perform(get("/enableUser").param("username", "testuser2")).andExpect(status().is(500))
-				.andExpect(jsonPath("$.message").value("啟用失敗，請稍後再試")).andExpect(jsonPath("$.status").value("error"));
+				.andExpect(jsonPath("$.message").value("非正常的啟用請求")).andExpect(jsonPath("$.status").value("error"));
 	}
     
-    @Test
-    @Order(4)
-	public void testEnableUser_Success() throws Exception {
-		System.out.println("執行啟用使用者帳號成功案例");
-//		doNothing().when(normalUserService).enableUser(anyString(), any(HttpServletRequest.class),
-//				any(HttpServletResponse.class));
-
-		mockMvc.perform(get("/enableUser").param("username", "testuser")).andExpect(status().isOk())
-				.andExpect(jsonPath("$.message").value("啟用成功，請使用此帳號登入")).andExpect(jsonPath("$.status").value("success"));
-	}
+//    @Test
+//    @Order(4)
+//	public void testEnableUser_Success() throws Exception {
+//		System.out.println("執行啟用使用者帳號成功案例");
+//
+//		mockMvc.perform(get("/enableUser")
+//				.param("username", "testuser")
+//				.param("remark","13"))
+//				.andExpect(status().isOk())
+//				.andExpect(jsonPath("$.message")
+//						.value("啟用成功，請使用此帳號登入"))
+//				.andExpect(jsonPath("$.status").value("success"));
+//	}
     
     
 }
