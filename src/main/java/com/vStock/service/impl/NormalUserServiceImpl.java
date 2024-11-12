@@ -1,8 +1,9 @@
 package com.vStock.service.impl;
 
-import java.sql.Date;
+import java.sql.Timestamp;
 import java.util.Arrays;
 import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 
 import javax.mail.MessagingException;
 import javax.servlet.http.HttpServletRequest;
@@ -12,6 +13,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -47,6 +49,14 @@ public class NormalUserServiceImpl implements NormalUserService{
 	
 	@Autowired
 	private ObjectMapper objectMapper;
+	
+	@Scheduled(cron = "0 0 0 * * ?")
+	@Transactional
+	public void cleanUnvalidUsers() {
+		logger.info("開始清理信箱未驗證使用者帳號");
+		normalUserDao.deleteAll(normalUserDao.findByRemarkStartWith("VERIFY_EMAIL_"));
+		logger.info("清理信箱未驗證使用者帳號完成!");
+	}
 
 	@Transactional
 	public void registerUser(HttpServletRequest req, HttpServletResponse res) {
@@ -63,7 +73,7 @@ public class NormalUserServiceImpl implements NormalUserService{
 			String password = new BCryptPasswordEncoder().encode(loginJson.getPassword());
 			String email = loginJson.getEmail();
 			//用來啟用帳號時驗證用，避免使用者可直接繞過信箱驗證直接啟用帳號
-			String remark = KeyUtils.generateKey(10,30);
+			String remark = "VERIFY_EMAIL_"+KeyUtils.generateAlphanumericKey(10,30);
 			if (normalUserDao.findByUsername(username).isPresent()) {
 				throw new RuntimeException("此帳號已被註冊");
 			}
@@ -74,7 +84,7 @@ public class NormalUserServiceImpl implements NormalUserService{
 					.setUsername(username)
 					.setPassword(password)
 					.setEmail(email)
-					.setRegisterDate(new Date(System.currentTimeMillis()))
+					.setRegisterDate(Timestamp.from(java.time.Instant.now()))
 					.setRemark(remark)
 					.build();
 			normalUserDao.save(user);
@@ -99,12 +109,12 @@ public class NormalUserServiceImpl implements NormalUserService{
 		}
 	}
 
-	//todo:須想辦法避免繞開email送信失敗的情況下仍然可以透過這個api直接解鎖帳號
 	@Transactional
 	public void enableUser(HttpServletRequest req, HttpServletResponse res) {
 		Optional<NormalUser> user = null;
 		String username = req.getParameter("username");
 		String remark = req.getParameter("remark");
+		System.out.println("username: "+username+" remark: "+remark);
 		if(!StringUtils.hasText(username) | !StringUtils.hasText(remark)) {
 			throw new RuntimeException("非正常的啟用請求");
 		}
@@ -114,7 +124,8 @@ public class NormalUserServiceImpl implements NormalUserService{
 			}
 			int id = user.get().getId();
 			try {
-				normalUserDao.enableUser(id, new Date(System.currentTimeMillis()));
+				normalUserDao.enableUser(id, Timestamp.from(java.time.Instant.now()));
+				normalUserDao.updateRemarkByUsername(username, "");
 				moneyAccountDao.unfreezeAccount(id);
 			}catch(Exception e) {
 				logger.error("使用者啟用帳號失敗或帳戶解凍失敗",e.getMessage());
@@ -133,6 +144,6 @@ public class NormalUserServiceImpl implements NormalUserService{
 		if(!user.isEnabled()) {
 			throw new RuntimeException("此帳號狀態目前為停用");
 		}
-		normalUserDao.updateLoginDate(user.getId(), new Date(System.currentTimeMillis()));
+		normalUserDao.updateLoginDate(user.getId(), Timestamp.from(java.time.Instant.now()));
 	}
 }

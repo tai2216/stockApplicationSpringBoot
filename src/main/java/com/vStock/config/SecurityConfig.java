@@ -49,7 +49,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter{
 //			.*: Matches any character (.) zero or more times (*).
 //			?: Makes the preceding group (\?.*) optional.
 //			.antMatchers("/login","/checkLogin","/oauth2/authorization/google","/register","/enableUser(\\?.*)?")
-			.regexMatchers("/login","/checkLogin","/oauth2/authorization/google","/register","/enableUser/(\\?.*)?")
+			.regexMatchers("/login","/checkLogin","/oauth2/authorization/google","/register","/enableUser","/enableUser/(\\?.*)?")
 			.permitAll()
 			.antMatchers("/css/**/**","/images/**/**","/js/**","/default/**","/layout/**","/img/**","/Message/**")
 			.permitAll()

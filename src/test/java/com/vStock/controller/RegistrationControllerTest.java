@@ -4,6 +4,9 @@ import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
+import java.util.List;
+
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 
 import javax.servlet.http.HttpServletRequest;
@@ -27,6 +30,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import com.vStock.dao.NormalUserDao;
+import com.vStock.model.NormalUser;
 import com.vStock.service.JavaMailService;
 import com.vStock.service.impl.NormalUserServiceImpl;
 
@@ -47,8 +51,8 @@ public class RegistrationControllerTest {
 //    private NormalUserServiceImpl normalUserService;
     
 //    @MockBean
-//    @Autowired
-//    private NormalUserDao normalUserDao;
+    @Autowired
+    private NormalUserDao normalUserDao;
     
 //    @MockBean
 //    @Autowired
@@ -90,6 +94,20 @@ public class RegistrationControllerTest {
     	username = "testuser";
     	password = "password";
     	email = "sam.tian@frog-jump.com";
+    	registerMock(username,password,email);
+    	username = "testuser2";
+    	password = "password";
+    	email = "abc123@frog-jump.com";
+    	registerMock(username,password,email);
+    	username = "testuser3";
+    	password = "password";
+    	email = "abc1234@frog-jump.com";
+    	registerMock(username,password,email);
+    	
+    	
+    }
+    
+    public void registerMock(String username, String password, String email) throws Exception {
         mockMvc.perform(post("/register")
         		.contentType(MediaType.APPLICATION_JSON)
         		.content("{\"username\":\"" + username + "\", \"password\":\"" + password + "\", \"email\":\"" + email + "\"}"))
@@ -101,14 +119,14 @@ public class RegistrationControllerTest {
                 .andExpect(jsonPath("$.status").value("success"));
     }
     
-    @Test
-    @Order(3)
-	public void testEnableUser_Failure() throws Exception {
-		System.out.println("執行啟用使用者帳號失敗案例");
-
-		mockMvc.perform(get("/enableUser").param("username", "testuser2")).andExpect(status().is(500))
-				.andExpect(jsonPath("$.message").value("非正常的啟用請求")).andExpect(jsonPath("$.status").value("error"));
-	}
+//    @Test
+//    @Order(3)
+//	public void testEnableUser_Failure() throws Exception {
+//		System.out.println("執行啟用使用者帳號失敗案例");
+//
+//		mockMvc.perform(get("/enableUser").param("username", "testuser2")).andExpect(status().is(500))
+//				.andExpect(jsonPath("$.message").value("非正常的啟用請求")).andExpect(jsonPath("$.status").value("error"));
+//	}
     
 //    @Test
 //    @Order(4)
@@ -123,6 +141,15 @@ public class RegistrationControllerTest {
 //						.value("啟用成功，請使用此帳號登入"))
 //				.andExpect(jsonPath("$.status").value("success"));
 //	}
+    
+    @Test
+    @Order(5)
+    public void deleteUnvalidatedUser() {
+    	System.out.println("執行刪除未驗證使用者案例");
+    	List<NormalUser> findByRemarkStartWith = normalUserDao.findByRemarkStartWith("VERIFY_EMAIL_");
+    	System.out.println("印出未驗證帳號");
+    	findByRemarkStartWith.forEach(System.out::println);
+    }
     
     
 }

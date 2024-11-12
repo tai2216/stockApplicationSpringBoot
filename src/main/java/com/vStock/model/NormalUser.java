@@ -1,6 +1,6 @@
 package com.vStock.model;
 
-import java.sql.Date;
+import java.sql.Timestamp;
 import java.util.List;
 
 import javax.persistence.CascadeType;
@@ -69,20 +69,20 @@ public class NormalUser {
 	private boolean enabled;
 	
 	@DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-	@Column(name = "LAST_LOGIN_DATE",columnDefinition = "DATE",nullable = true)
-	private Date lastLoginDate;
+	@Column(name = "LAST_LOGIN_DATE",columnDefinition = "SMALLDATETIME",nullable = true)
+	private Timestamp lastLoginDate;
 	
 	@DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-	@Column(name = "REGISTER_DATE",columnDefinition = "DATE")
-	private Date registerDate;
+	@Column(name = "REGISTER_DATE",columnDefinition = "SMALLDATETIME")
+	private Timestamp registerDate;
 	
 	@DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-	@Column(name = "ENABLED_DATE",columnDefinition = "DATE",nullable = true)
-	private Date enabledDate;
+	@Column(name = "ENABLED_DATE",columnDefinition = "SMALLDATETIME",nullable = true)
+	private Timestamp enabledDate;
 	
 	@DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-	@Column(name = "DISABLED_DATE",columnDefinition = "DATE",nullable = true)
-	private Date disabledDate;
+	@Column(name = "DISABLED_DATE",columnDefinition = "SMALLDATETIME",nullable = true)
+	private Timestamp disabledDate;
 	
 	@Column(name = "REMARK",columnDefinition = "NVARCHAR(200)",nullable = true)
 	private String remark;

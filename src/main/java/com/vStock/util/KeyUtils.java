@@ -31,4 +31,37 @@ public class KeyUtils {
 	public static int generateRandomInt(int min, int max) {
 		return (int) (Math.random() * (max - min) + min);
 	}
+	
+	private static final String ALPHANUMERIC_CHARACTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+	
+    /*
+     * 只產生包含英文與數字的隨機密鑰 傳入指定長度
+     */
+    public static String generateAlphanumericKey(int length) {
+        SecureRandom secureRandom = new SecureRandom();
+        StringBuilder key = new StringBuilder(length);
+        for (int i = 0; i < length; i++) {
+            int index = secureRandom.nextInt(ALPHANUMERIC_CHARACTERS.length());
+            key.append(ALPHANUMERIC_CHARACTERS.charAt(index));
+        }
+        return key.toString();
+    } 
+    
+    /*
+     * 產生範圍內指定長度
+     * */
+    public static String generateAlphanumericKey(int min,int max) {
+    	int length = (int) (Math.random() * (max - min) + min);
+    	SecureRandom secureRandom = new SecureRandom();
+    	StringBuilder key = new StringBuilder(length);
+    	for (int i = 0; i < length; i++) {
+    		int index = secureRandom.nextInt(ALPHANUMERIC_CHARACTERS.length());
+    		key.append(ALPHANUMERIC_CHARACTERS.charAt(index));
+    	}
+    	return key.toString();
+    } 
+	
+	
+	
+	
 }
