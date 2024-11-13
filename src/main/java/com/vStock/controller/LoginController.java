@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.vStock.dao.NormalUserDao;
 import com.vStock.model.LoginResponse;
 import com.vStock.service.NormalUserService;
 
@@ -17,6 +18,9 @@ public class LoginController {
 
 	@Autowired
 	private NormalUserService normalUserService;
+	
+	@Autowired
+	private NormalUserDao normalUserDao;
 	
 	@RequestMapping(value = "/login"
 					,method = {RequestMethod.POST}
@@ -29,7 +33,9 @@ public class LoginController {
 		}
 		normalUserService.updateLoginDate(res.getHeader("loginUserName"));
         return ResponseEntity.ok(
-				LoginResponse.builder().username(res.getHeader("loginUserName"))
+				LoginResponse.builder()
+				.userId(normalUserDao.findByUsername(res.getHeader("loginUserName")).get().getId())
+				.username(res.getHeader("loginUserName"))
 				.role(res.getHeader("role"))
 				.token(res.getHeader("Authorization"))
 				.message("Log In Success")

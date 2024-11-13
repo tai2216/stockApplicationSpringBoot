@@ -381,7 +381,11 @@ public class StockService {
 		}catch(Exception e) {
 //			e.printStackTrace();
 			logger.error("交易失敗", e.getMessage());
-			throw new RuntimeException("交易失敗，請洽詢網站管理者或來信至"+developerEmail);
+			if(StringUtils.hasText(e.getMessage())) {
+				throw e;
+			}else {
+				throw new RuntimeException("交易失敗，請洽詢網站管理者或來信至"+developerEmail);
+			}
 		}
 	}
 	
