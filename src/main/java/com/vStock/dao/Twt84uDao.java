@@ -30,6 +30,11 @@ public interface Twt84uDao extends JpaRepository<TWT84U, Integer>, PagingAndSort
 	public String findNameByCode(String code);
 	
 	@Query(nativeQuery = true
+			, value = "SELECT DISTINCT PREVIOUS_DAY_PRICE FROM TWT84U WHERE CODE = :code")
+	@Transactional(readOnly = true)
+	public Optional<String> findPrviousDayPriceByCode(String code);
+	
+	@Query(nativeQuery = true
 			, value = "SELECT DISTINCT PREVIOUS_DAY_PRICE FROM TWT84U WHERE CODE = :code AND LAST_TRADING_DAY = :date")
 	@Transactional(readOnly = true)
 	public Optional<String> findPrviousDayPriceByCodeAndDate(String code, String date);

@@ -7,6 +7,8 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.vStock.dao.StockHoldingDao;
+import com.vStock.dao.StockHoldingDetailsDao;
 import com.vStock.model.GeneralResponse;
 import com.vStock.model.StockTransaction;
 import com.vStock.other.TransactionType;
@@ -18,15 +20,20 @@ public class StockController {
 	@Autowired
 	private StockService stockService;
 	
+	@Autowired
+	private StockHoldingDao stockHoldingDao;
+	
+	@Autowired
+	private StockHoldingDetailsDao stockHoldingDetailsDao;
+	
 	@RequestMapping(method = RequestMethod.POST
 					,value = "/buyStock"
 					,produces = "application/json")
 	public ResponseEntity<GeneralResponse> buyStock(@RequestParam(name = "userId") int userId,
 										            @RequestParam(name = "quantity") int quantity,
-										            @RequestParam(name = "stockCode") String stockCode,
-										            @RequestParam(name = "date") String date) {
+										            @RequestParam(name = "stockCode") String stockCode) {
 		try {
-			StockTransaction transaction = stockService.buyOrSellStock(TransactionType.BUY, userId, quantity, stockCode, date);
+			StockTransaction transaction = stockService.buyOrSellStock(TransactionType.BUY, userId, quantity, stockCode);
 			return ResponseEntity.ok(GeneralResponse.builder()
 													.setStatus("success")
 													.setMessage("交易成功")
@@ -47,10 +54,9 @@ public class StockController {
 			,produces = "application/json")
 	public ResponseEntity<GeneralResponse> sellStock(@RequestParam(name = "userId") int userId,
 										            @RequestParam(name = "quantity") int quantity,
-										            @RequestParam(name = "stockCode") String stockCode,
-										            @RequestParam(name = "date") String date) {
+										            @RequestParam(name = "stockCode") String stockCode) {
 		try {
-			StockTransaction transaction = stockService.buyOrSellStock(TransactionType.SELL, userId, quantity, stockCode, date);
+			StockTransaction transaction = stockService.buyOrSellStock(TransactionType.SELL, userId, quantity, stockCode);
 			return ResponseEntity.ok(GeneralResponse.builder()
 					.setStatus("success")
 					.setMessage("交易成功")
@@ -90,6 +96,7 @@ public class StockController {
         }
 		
 	}
+	
 	@RequestMapping(method = RequestMethod.GET
 			,value = "/searchStock"
 			,produces = "application/json")
@@ -110,6 +117,54 @@ public class StockController {
 		}
 		
 	}
+	
+	@RequestMapping(method = RequestMethod.GET
+			,value = "/queryStockHolding"
+			,produces = "application/json")
+	public ResponseEntity<GeneralResponse> queryStockHolding(
+			@RequestParam(name = "userId")int userId,
+			@RequestParam(name = "page")int page) {
+		try {
+			return ResponseEntity.ok(GeneralResponse.builder()
+					.setStatus("success")
+					.setMessage("查詢成功")
+					.setData(stockService.queryStockHolding(page,userId))
+					.build());
+		}catch(Exception e) {
+			return ResponseEntity.internalServerError()
+					.body(GeneralResponse.builder()
+							.setError(e.getMessage())
+							.setStatus("failed")
+							.setMessage("查詢持股錯誤")
+							.build());
+		}
+		
+	}
+	
+	@RequestMapping(method = RequestMethod.GET
+			,value = "/queryStockHoldingDetails"
+			,produces = "application/json")
+	public ResponseEntity<GeneralResponse> queryStockHoldingDetails(
+			@RequestParam(name = "stockHoldingNo")int stockHoldingNo,
+			@RequestParam(name = "page")int page) {
+		try {
+			return ResponseEntity.ok(GeneralResponse.builder()
+					.setStatus("success")
+					.setMessage("查詢成功")
+					.setData(stockService.queryStockHoldingDetails(page,stockHoldingNo))
+					.build());
+		}catch(Exception e) {
+			return ResponseEntity.internalServerError()
+					.body(GeneralResponse.builder()
+							.setError(e.getMessage())
+							.setStatus("failed")
+							.setMessage("查詢持股明細錯誤")
+							.build());
+		}
+		
+	}
+	
+
 	
 	
 }

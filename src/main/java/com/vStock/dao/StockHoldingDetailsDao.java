@@ -20,7 +20,13 @@ public interface StockHoldingDetailsDao extends JpaRepository<StockHoldingDetail
 	public Optional<List<StockHoldingDetails>> findByFkUserId(int fkUserId);
 	
 	@Query(nativeQuery = true
-			,value = "SELECT * FROM STOCK_HOLDING_DETAILS WHERE FK_USER_ID = :fkUserId AND STOCK_CODE = :stockCode")
+			,value = "SELECT * FROM STOCK_HOLDING_DETAILS WHERE FK_STOCK_HOLDING_NO = :fkStockHoldingNo "
+					+ "ORDER BY SERIAL_NO OFFSET :page ROWS FETCH NEXT 15 ROWS ONLY")
+	@Transactional(readOnly = true)
+	public Optional<List<StockHoldingDetails>> findByFkStockHoldingNoToPage(int page, int fkStockHoldingNo);
+	
+	@Query(nativeQuery = true
+			,value = "SELECT * FROM STOCK_HOLDING_DETAILS WHERE FK_USER_ID = :fkUserId AND STOCK_CODE = :stockCode ORDER BY SERIAL_NO ASC")
 	@Transactional(readOnly = true)
 	public Optional<List<StockHoldingDetails>> findByFkUserIdAndStockCode(int fkUserId,String stockCode);
 	

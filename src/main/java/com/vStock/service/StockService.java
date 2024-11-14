@@ -4,9 +4,11 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.sql.Date;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -170,6 +172,20 @@ public class StockService {
 		return new PageImpl<>(result,pageable,result.size());
 	}
 	
+	public Page<StockHolding> queryStockHolding(int page, int userId){
+		List<StockHolding> result = stockHoldingDao.findByFkUserIdToPage(page,userId)
+				.orElseThrow(()->new RuntimeException("查無此使用者持股"));
+		Pageable pageable = PageRequest.of(page, 15,Sort.by("SERIAL_NO").ascending());
+		return new PageImpl<>(result,pageable,result.size());
+	}
+	
+	public Page<StockHoldingDetails> queryStockHoldingDetails(int page, int stockHoldingNo){
+		List<StockHoldingDetails> result = stockHoldingDetailsDao.findByFkStockHoldingNoToPage(page,stockHoldingNo)
+				.orElseThrow(()->new RuntimeException("查無此使用者持股明細"));
+		Pageable pageable = PageRequest.of(page, 15,Sort.by("SERIAL_NO").ascending());
+		return new PageImpl<>(result,pageable,result.size());
+	}
+	
 	/*
 	 * 將取得的股票api資料存入桌面excel以利測試時使用drop table，也仍有留存資料供日後使用
 	 * */
@@ -272,8 +288,7 @@ public class StockService {
 	public StockTransaction buyOrSellStock(TransactionType type
 											,@NotEmpty int userId
 					                        ,@NotEmpty int quantity
-											,@NotEmpty String stockCode
-											,@NotEmpty String date) {
+											,@NotEmpty String stockCode) {
 		try {
 			Optional<NormalUser> user = normalUserDao.findById(userId);
 			if(user.isEmpty()) {
@@ -282,7 +297,7 @@ public class StockService {
 			if((!user.get().isEnabled())) {
 				throw new RuntimeException("此帳號狀態目前為停用");
 			}
-			Optional<String> p = twt84uDao.findPrviousDayPriceByCodeAndDate(stockCode,date);
+			Optional<String> p = twt84uDao.findPrviousDayPriceByCode(stockCode);
 			if (p.isEmpty()) {
 				throw new RuntimeException("未找到此檔股票: " + stockCode);
 			}
@@ -335,25 +350,60 @@ public class StockService {
 						.setTotalCost(cost)
 						.build());
 			}
-			stockHoldingDetailsDao.save(StockHoldingDetails.builder()
-					.setFkUserId(userId)
-					.setFkStockHoldingNo(stockHoldingDao.findByFkUserIdAndStockCode(userId,stockCode)
-														.orElseThrow(()->new RuntimeException("找不到此持股")).getSerialNo())
-					.setStockCode(stockCode)
-					.setStockName(stockName)
-					.setQuantity(TransactionType.BUY==type? quantity : -quantity)//如果是賣出則數量轉為負數)
-					.setTransactionDate(new Date(System.currentTimeMillis()))
-					.setTransactionType(type.toString())
-					.setPrice(TransactionType.BUY==type? price : -price)//如果是賣出則價格轉為負數
-					.setCost(TransactionType.BUY==type? cost : cost.negate())//如果是賣出則成本轉為負數)
-					.build());
+			//只有在非賣出的情況下才去新增持股明細
+			if(TransactionType.SELL!=type) {
+				stockHoldingDetailsDao.save(StockHoldingDetails.builder()
+						.setFkUserId(userId)
+						.setFkStockHoldingNo(stockHoldingDao.findByFkUserIdAndStockCode(userId,stockCode)
+								.orElseThrow(()->new RuntimeException("找不到此持股")).getSerialNo())
+						.setStockCode(stockCode)
+						.setStockName(stockName)
+						.setQuantity(quantity)
+						.setTransactionDate(new Date(System.currentTimeMillis()))
+						.setTransactionType(type.toString())
+						.setPrice(price)
+						.setCost(cost)
+						.build());
+			}
 			//更新持股資訊
 			StockHolding stockHolding = stockHoldingDao.findByFkUserIdAndStockCode(userId, stockCode)
 														.orElseThrow(()->new RuntimeException("找不到此持股"));
 			List<StockHoldingDetails> stockHoldingDetails = stockHoldingDetailsDao.findByFkUserIdAndStockCode(userId, stockCode)
 																					.orElseThrow(()->new RuntimeException("找不到此持股細節"));
+			logger.debug("賣出前的stockHoldingDetails: "+stockHoldingDetails.size());
+			//sell
+			if(TransactionType.SELL==type) {
+				BigDecimal tmpCost = cost;
+				int tmpQuantity = quantity;
+				List<StockHoldingDetails> toRemove = new ArrayList<>();
+				for(StockHoldingDetails details:stockHoldingDetails) {
+					BigDecimal detailsCost = details.getCost();
+					BigDecimal subResult = tmpCost.subtract(detailsCost);
+					tmpQuantity -= details.getQuantity();
+					int compareResult = subResult.compareTo(BigDecimal.ZERO);
+					if (compareResult== 0) {
+						toRemove.add(details);
+						break;
+					}else if(compareResult>0){
+						toRemove.add(details);
+					} if(compareResult<0) {//持股細節大於要賣出的股數
+						details.setQuantity(details.getQuantity()-tmpQuantity);
+						stockHoldingDetailsDao.saveAndFlush(details);
+						break;
+					}
+					tmpCost = subResult;
+				}
+				logger.debug("要刪除的持股明細: "+toRemove.size());
+				stockHoldingDetails.removeAll(toRemove);
+				logger.debug("賣出後的stockHoldingDetails: "+stockHoldingDetails.size());
+			}
+			
+			
+			
 			int totalQuantity = stockHoldingDetails.stream().collect(Collectors.summingInt(StockHoldingDetails::getQuantity));
+//			logger.debug("totalQuantity: "+totalQuantity);
 			BigDecimal totalCost = stockHoldingDetails.stream().map(StockHoldingDetails::getCost).reduce(BigDecimal.ZERO, BigDecimal::add);
+//			logger.debug("totalCost: "+totalCost);
 			if(checkStockHoldingAllZero(totalQuantity, totalCost)) {
 //				此時關聯到的持股明細不會更新(可能是因為交易尚未被成立)，因此需要自己去做更新，這樣才會在後續的刪除操作自動關聯相關的持股明細且一起跟著持股被刪除
 //				stockHoldingDao.findById(stockHolding.getSerialNo())
@@ -364,7 +414,7 @@ public class StockService {
 				//如果賣出後持股數為0以及其他各項數字皆為0則可以直接刪除此筆資料
 				stockHoldingDao.deleteById(stockHolding.getSerialNo());
 			}else {
-				double priceAverage = totalCost.divide(new BigDecimal(totalQuantity)).doubleValue();
+				double priceAverage = totalCost.divide(new BigDecimal(totalQuantity),2, RoundingMode.HALF_UP).doubleValue();
 				stockHolding.setTotalQuantity(totalQuantity);
 				stockHolding.setTotalCost(totalCost);
 				stockHolding.setPriceAverage(priceAverage);
@@ -379,7 +429,7 @@ public class StockService {
 					.setTransactionType(type.toString())
 					.build());
 		}catch(Exception e) {
-//			e.printStackTrace();
+			e.printStackTrace();
 			logger.error("交易失敗", e.getMessage());
 			if(StringUtils.hasText(e.getMessage())) {
 				throw e;
