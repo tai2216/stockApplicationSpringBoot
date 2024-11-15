@@ -7,8 +7,6 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.vStock.dao.StockHoldingDao;
-import com.vStock.dao.StockHoldingDetailsDao;
 import com.vStock.model.GeneralResponse;
 import com.vStock.model.StockTransaction;
 import com.vStock.other.TransactionType;
@@ -19,12 +17,6 @@ public class StockController {
 	
 	@Autowired
 	private StockService stockService;
-	
-	@Autowired
-	private StockHoldingDao stockHoldingDao;
-	
-	@Autowired
-	private StockHoldingDetailsDao stockHoldingDetailsDao;
 	
 	@RequestMapping(method = RequestMethod.POST
 					,value = "/buyStock"
@@ -159,6 +151,27 @@ public class StockController {
 							.setError(e.getMessage())
 							.setStatus("failed")
 							.setMessage("查詢持股明細錯誤")
+							.build());
+		}
+		
+	}
+	
+	@RequestMapping(method = RequestMethod.GET
+			,value = "/getTWIndexCurrentMonth"
+			,produces = "application/json")
+	public ResponseEntity<GeneralResponse> queryStockHoldingDetails() {
+		try {
+			return ResponseEntity.ok(GeneralResponse.builder()
+					.setStatus("success")
+					.setMessage("查詢成功")
+					.setData(stockService.getTwStockMonthData())
+					.build());
+		}catch(Exception e) {
+			return ResponseEntity.internalServerError()
+					.body(GeneralResponse.builder()
+							.setError(e.getMessage())
+							.setStatus("failed")
+							.setMessage("資料發生錯誤")
 							.build());
 		}
 		

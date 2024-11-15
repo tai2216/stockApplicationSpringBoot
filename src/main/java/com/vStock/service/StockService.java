@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.sql.Date;
+import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -26,7 +27,6 @@ import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.beans.support.PagedListHolder;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
@@ -52,6 +52,8 @@ import com.vStock.model.MoneyAccount;
 import com.vStock.model.NormalUser;
 import com.vStock.model.StockHolding;
 import com.vStock.model.StockHoldingDetails;
+import com.vStock.model.StockModel;
+import com.vStock.model.StockModel2;
 import com.vStock.model.StockTransaction;
 import com.vStock.model.TWT84U;
 import com.vStock.other.TransactionType;
@@ -62,6 +64,36 @@ public class StockService {
 	private static final Logger logger = LogManager.getLogger(StockService.class);
 	
 	private RestTemplate restTemplate;
+	
+	private static List<StockModel2> twStockMonthData;
+	
+	/*
+	 * 取得台股近一個月大盤的收盤價資料提供給首頁的圖表使用
+	 * */
+	public List<StockModel2> getTwStockMonthData() {
+		java.util.Date today = new java.util.Date();
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd");
+		if (formattedDate != null && formattedDate.equals(dateFormat.format(today))) {
+			logger.debug("今日已取得證交所API台股近月收盤價資料");
+			return twStockMonthData;
+        }
+        formattedDate = dateFormat.format(today);
+		StockModel stockModel = this.restTemplate
+				.getForObject("https://www.twse.com.tw/rwd/zh/afterTrading/FMTQIK?date="+formattedDate+"&response=json"
+				, StockModel.class);
+		List<StockModel2> list = new ArrayList<>();
+		for (String[] s : stockModel.getData()) {
+			list.add(StockModel2.builder()
+					.date(s[0])
+					.price(s[4])
+					.build());
+		}
+		twStockMonthData = list;
+		logger.debug("取得證交所API台股近月收盤價資料成功");
+		return twStockMonthData;
+	}
+	
+	private static String formattedDate;
 	
 	@Autowired
 	private NormalUserDao normalUserDao;
@@ -93,7 +125,7 @@ public class StockService {
 	public StockService() throws JsonMappingException, JsonProcessingException {
 		if (this.restTemplate == null) {
 			logger.debug("建立RestTemplate");
-			restTemplate = new RestTemplate();
+			this.restTemplate = new RestTemplate();
 		}
 		this.saveApiDataToExcel();//保存歷史資料到excel,目前還無使用規劃但先保存
 //		this.testSchedule();

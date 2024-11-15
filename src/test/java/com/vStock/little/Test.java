@@ -3,15 +3,17 @@ package com.vStock.little;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.security.SecureRandom;
-import java.sql.Timestamp;
+import java.text.SimpleDateFormat;
 import java.util.Base64;
-import java.util.Random;
+import java.util.Date;
 
 public class Test {
 	public static void main(String[] args) {
-		
-//		System.out.println(new BigDecimal(1745).divide(new BigDecimal(9), 2, RoundingMode.HALF_UP));
-		System.out.println(10-(-9));
+        Date today = new Date();
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd");
+        String formattedDate = dateFormat.format(today);
+        System.out.println(formattedDate);
+
 	}
 	
 	public static BigDecimal toBig(int num) {
