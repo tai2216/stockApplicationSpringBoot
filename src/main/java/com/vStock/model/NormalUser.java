@@ -89,7 +89,7 @@ public class NormalUser {
 	
 	@OneToMany(fetch = FetchType.EAGER,
 			mappedBy = "fkUserId",
-			cascade = CascadeType.ALL)
+			cascade = CascadeType.REMOVE)
 	private List<UserDisabledDetail> userDisabledDetailList;
 	
 

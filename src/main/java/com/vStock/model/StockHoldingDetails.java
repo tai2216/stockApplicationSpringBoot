@@ -71,7 +71,7 @@ public class StockHoldingDetails {//使用者持股明細TABLE
 	
 	@ManyToOne(targetEntity = StockHolding.class
 			,optional = true
-			,fetch = FetchType.EAGER)
+			,fetch = FetchType.LAZY)
 	@JoinColumn(name = "FK_STOCK_HOLDING_NO")
 	private int getfkStockHoldingNo() {return this.fkStockHoldingNo;};
 

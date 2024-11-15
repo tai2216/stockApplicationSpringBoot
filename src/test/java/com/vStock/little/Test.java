@@ -10,7 +10,8 @@ import java.util.Random;
 public class Test {
 	public static void main(String[] args) {
 		
-		System.out.println(new BigDecimal(1745).divide(new BigDecimal(9), 2, RoundingMode.HALF_UP));
+//		System.out.println(new BigDecimal(1745).divide(new BigDecimal(9), 2, RoundingMode.HALF_UP));
+		System.out.println(10-(-9));
 	}
 	
 	public static BigDecimal toBig(int num) {

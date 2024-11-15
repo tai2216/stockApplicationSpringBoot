@@ -18,6 +18,10 @@ public interface StockHoldingDao extends JpaRepository<StockHolding, Integer>{
 	@Transactional(readOnly = true)
 	public Optional<List<StockHolding>> findByFkUserId(int fkUserId);
 	
+	@Query(nativeQuery = true, value = "SELECT COUNT(*) FROM STOCK_HOLDING WHERE FK_USER_ID = :fkUserId ")
+	@Transactional(readOnly = true)
+	public int findCountByFkUserId(int fkUserId);
+	
 	@Query(nativeQuery = true
 			, value = "SELECT * FROM STOCK_HOLDING WHERE FK_USER_ID = :fkUserId "
 					+ "ORDER BY SERIAL_NO OFFSET :page ROWS FETCH NEXT 15 ROWS ONLY")

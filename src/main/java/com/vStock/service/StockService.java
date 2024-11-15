@@ -26,6 +26,7 @@ import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.beans.support.PagedListHolder;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
@@ -173,17 +174,21 @@ public class StockService {
 	}
 	
 	public Page<StockHolding> queryStockHolding(int page, int userId){
-		List<StockHolding> result = stockHoldingDao.findByFkUserIdToPage(page,userId)
+		List<StockHolding> result = stockHoldingDao.findByFkUserIdToPage(page ==0? 0:page+14,userId)
 				.orElseThrow(()->new RuntimeException("查無此使用者持股"));
 		Pageable pageable = PageRequest.of(page, 15,Sort.by("SERIAL_NO").ascending());
-		return new PageImpl<>(result,pageable,result.size());
+		return new PageImpl<>(result,pageable
+				,page !=0 ?
+				result.size()+1:stockHoldingDao.findCountByFkUserId(userId));
 	}
 	
 	public Page<StockHoldingDetails> queryStockHoldingDetails(int page, int stockHoldingNo){
-		List<StockHoldingDetails> result = stockHoldingDetailsDao.findByFkStockHoldingNoToPage(page,stockHoldingNo)
+		List<StockHoldingDetails> result = stockHoldingDetailsDao.findByFkStockHoldingNoToPage(page ==0? 0:page+14,stockHoldingNo)
 				.orElseThrow(()->new RuntimeException("查無此使用者持股明細"));
-		Pageable pageable = PageRequest.of(page, 15,Sort.by("SERIAL_NO").ascending());
-		return new PageImpl<>(result,pageable,result.size());
+		Pageable pageable = PageRequest.of(page, 15,Sort.by("SERIAL_NO").ascending());//stockHoldingDetailsDao.findCountByFkStockHoldingNo(stockHoldingNo)
+		return new PageImpl<>(result, pageable
+				,page !=0 ?
+				result.size()+1 : stockHoldingDetailsDao.findCountByFkStockHoldingNo(stockHoldingNo));
 	}
 	
 	/*
@@ -370,32 +375,30 @@ public class StockService {
 														.orElseThrow(()->new RuntimeException("找不到此持股"));
 			List<StockHoldingDetails> stockHoldingDetails = stockHoldingDetailsDao.findByFkUserIdAndStockCode(userId, stockCode)
 																					.orElseThrow(()->new RuntimeException("找不到此持股細節"));
-			logger.debug("賣出前的stockHoldingDetails: "+stockHoldingDetails.size());
-			//sell
+			//賣股邏輯:從明細裡面依照交易序號serail_no排序由最早交易買入的開始賣出
 			if(TransactionType.SELL==type) {
-				BigDecimal tmpCost = cost;
+//				logger.debug("賣出前的stockHoldingDetails: "+stockHoldingDetails.size());
 				int tmpQuantity = quantity;
 				List<StockHoldingDetails> toRemove = new ArrayList<>();
 				for(StockHoldingDetails details:stockHoldingDetails) {
-					BigDecimal detailsCost = details.getCost();
-					BigDecimal subResult = tmpCost.subtract(detailsCost);
 					tmpQuantity -= details.getQuantity();
-					int compareResult = subResult.compareTo(BigDecimal.ZERO);
-					if (compareResult== 0) {
+					if (tmpQuantity== 0) {
 						toRemove.add(details);
 						break;
-					}else if(compareResult>0){
+					}else if(tmpQuantity>0){
 						toRemove.add(details);
-					} if(compareResult<0) {//持股細節大於要賣出的股數
-						details.setQuantity(details.getQuantity()-tmpQuantity);
+					} if(tmpQuantity<0) {//持股細節大於要賣出的股數
+						int absQuantity = Math.abs(tmpQuantity);
+						details.setQuantity(absQuantity);
+						details.setCost(new BigDecimal(absQuantity*details.getPrice()));
 						stockHoldingDetailsDao.saveAndFlush(details);
 						break;
 					}
-					tmpCost = subResult;
 				}
-				logger.debug("要刪除的持股明細: "+toRemove.size());
+//				logger.debug("要刪除的持股明細: "+toRemove.size());
 				stockHoldingDetails.removeAll(toRemove);
-				logger.debug("賣出後的stockHoldingDetails: "+stockHoldingDetails.size());
+				stockHoldingDetailsDao.deleteAll(toRemove);
+//				logger.debug("賣出後的stockHoldingDetails: "+stockHoldingDetails.size());
 			}
 			
 			

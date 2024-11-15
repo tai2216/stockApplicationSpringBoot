@@ -64,9 +64,9 @@ public class StockHolding {//使用者持股TABLE
 	@JoinColumn(name = "FK_USER_ID")
 	private int getNormalUserId() {return this.fkUserId;};
 	
-	@OneToMany(fetch = FetchType.EAGER,
+	@OneToMany(fetch = FetchType.LAZY,
 			mappedBy = "fkStockHoldingNo",
-			cascade = CascadeType.ALL)
+			cascade = CascadeType.REMOVE)
 	private List<StockHoldingDetails> stockHoldingDetailsList;
 
 	

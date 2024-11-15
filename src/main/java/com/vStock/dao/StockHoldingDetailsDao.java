@@ -26,6 +26,11 @@ public interface StockHoldingDetailsDao extends JpaRepository<StockHoldingDetail
 	public Optional<List<StockHoldingDetails>> findByFkStockHoldingNoToPage(int page, int fkStockHoldingNo);
 	
 	@Query(nativeQuery = true
+			,value = "SELECT COUNT(*) FROM STOCK_HOLDING_DETAILS WHERE FK_STOCK_HOLDING_NO = :fkStockHoldingNo ")
+	@Transactional(readOnly = true)
+	public int findCountByFkStockHoldingNo(int fkStockHoldingNo);
+	
+	@Query(nativeQuery = true
 			,value = "SELECT * FROM STOCK_HOLDING_DETAILS WHERE FK_USER_ID = :fkUserId AND STOCK_CODE = :stockCode ORDER BY SERIAL_NO ASC")
 	@Transactional(readOnly = true)
 	public Optional<List<StockHoldingDetails>> findByFkUserIdAndStockCode(int fkUserId,String stockCode);
