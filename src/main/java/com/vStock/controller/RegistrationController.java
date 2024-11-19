@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.vStock.model.GeneralResponse;
 import com.vStock.service.NormalUserService;
+import com.vStock.util.ResponseUtils;
 
 @RestController
 public class RegistrationController {
@@ -26,18 +27,9 @@ public class RegistrationController {
 		try {
 			normalUserService.registerUser(req, res);
 		}catch(Exception e) {
-			return ResponseEntity.internalServerError()
-					.body(GeneralResponse.builder()
-//							.setMessage("註冊失敗，請稍後再試")
-							.setMessage(e.getMessage())
-							.setStatus("error")
-							.setError(e.getMessage())
-							.build());
+			return ResponseUtils.error("failed", e.getMessage(), e);
 		}
-		return ResponseEntity.ok(GeneralResponse.builder()
-				.setMessage("註冊成功，請於今日結束之前至信箱查看確認信件以啟用帳號")
-				.setStatus("success")
-				.build());
+		return ResponseUtils.success("success", "註冊成功，請於今日結束之前至信箱查看確認信件以啟用帳號", null);
 	}
 	
 	@RequestMapping(value = "/enableUser"
@@ -48,18 +40,9 @@ public class RegistrationController {
 		try {
 			normalUserService.enableUser(req, res);
 		} catch (Exception e) {
-			return ResponseEntity.internalServerError()
-					.body(GeneralResponse.builder()
-//							.setMessage("啟用失敗，請稍後再試")
-							.setMessage(e.getMessage())
-							.setStatus("error")
-							.setError(e.getMessage())
-							.build());
+			return ResponseUtils.error("failed", e.getMessage(), e);
 		}
-		return ResponseEntity.ok(GeneralResponse.builder()
-				.setMessage("啟用成功，請使用此帳號登入")
-				.setStatus("success")
-				.build());
+		return ResponseUtils.success("success", "啟用成功，請使用此帳號登入", null);
 	}
 
 }

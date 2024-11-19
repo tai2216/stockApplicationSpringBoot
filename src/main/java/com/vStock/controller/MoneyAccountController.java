@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.vStock.dao.MoneyAccountDao;
 import com.vStock.model.GeneralResponse;
+import com.vStock.util.ResponseUtils;
 
 @RestController
 public class MoneyAccountController {
@@ -21,19 +22,10 @@ public class MoneyAccountController {
 			,produces = "application/json")
 	public ResponseEntity<GeneralResponse> getAccountBalance(@RequestParam(name="userId")int userId){
 		try {
-			return ResponseEntity.ok(GeneralResponse.builder()
-					.setStatus("success")
-					.setMessage("查詢成功")
-					.setData(moneyAccountdao.findByFkUserId(userId)
-							.orElseThrow(()->new RuntimeException("查無此帳戶餘額")))
-					.build());
+			return ResponseUtils.success("success", "查詢成功"
+					,moneyAccountdao.findByFkUserId(userId).orElseThrow(()->new RuntimeException("查無此帳戶餘額")));
 		}catch(Exception e) {
-			return ResponseEntity.internalServerError()
-					.body(GeneralResponse.builder()
-							.setError(e.getMessage())
-							.setStatus("failed")
-                            .setMessage("查詢帳戶餘額失敗")
-							.build());
+			return ResponseUtils.error("failed", "查詢帳戶餘額失敗", e);
 		}
 	}
 }

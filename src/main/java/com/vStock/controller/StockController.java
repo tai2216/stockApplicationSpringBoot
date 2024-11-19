@@ -11,6 +11,7 @@ import com.vStock.model.GeneralResponse;
 import com.vStock.model.StockTransaction;
 import com.vStock.other.TransactionType;
 import com.vStock.service.StockService;
+import com.vStock.util.ResponseUtils;
 
 @RestController
 public class StockController {
@@ -26,18 +27,9 @@ public class StockController {
 										            @RequestParam(name = "stockCode") String stockCode) {
 		try {
 			StockTransaction transaction = stockService.buyOrSellStock(TransactionType.BUY, userId, quantity, stockCode);
-			return ResponseEntity.ok(GeneralResponse.builder()
-													.setStatus("success")
-													.setMessage("交易成功")
-													.setData(transaction)
-													.build());
+			return ResponseUtils.success("success", "交易成功", transaction);
 		}catch(Exception e) {
-			return ResponseEntity.internalServerError()
-					.body(GeneralResponse.builder()
-										.setError(e.getMessage())
-										.setStatus("failed")
-										.setMessage("交易失敗")
-										.build());
+			return ResponseUtils.error("failed", "交易失敗", e);
 		}
 		
 	}
@@ -49,18 +41,9 @@ public class StockController {
 										            @RequestParam(name = "stockCode") String stockCode) {
 		try {
 			StockTransaction transaction = stockService.buyOrSellStock(TransactionType.SELL, userId, quantity, stockCode);
-			return ResponseEntity.ok(GeneralResponse.builder()
-					.setStatus("success")
-					.setMessage("交易成功")
-					.setData(transaction)
-					.build());
+			return ResponseUtils.success("success", "交易成功", transaction);
 		}catch(Exception e) {
-			return ResponseEntity.internalServerError()
-					.body(GeneralResponse.builder()
-							.setError(e.getMessage())
-							.setStatus("failed")
-							.setMessage("交易失敗")
-							.build());
+			return ResponseUtils.error("failed", "交易失敗", e);
 		}
 		
 	}
@@ -73,18 +56,9 @@ public class StockController {
                                                           @RequestParam(name = "sort") String sort,
                                                           @RequestParam(name = "order") String order) {
         try {
-            return ResponseEntity.ok(GeneralResponse.builder()
-                    .setStatus("success")
-                    .setMessage("查詢成功")
-                    .setData(stockService.getStockByPageWithSort(page, size, sort, order))
-                    .build());
+        	return ResponseUtils.success("success", "查詢成功", stockService.getStockByPageWithSort(page, size, sort, order));
         }catch(Exception e) {
-            return ResponseEntity.internalServerError()
-                    .body(GeneralResponse.builder()
-                            .setError(e.getMessage())
-                            .setStatus("failed")
-                            .setMessage("查詢失敗")
-                            .build());
+        	return ResponseUtils.error("failed", "查詢失敗", e);
         }
 		
 	}
@@ -94,18 +68,9 @@ public class StockController {
 			,produces = "application/json")
 	public ResponseEntity<GeneralResponse> searchStock(@RequestParam(name = "keyWord")String keyWord) {
 		try {
-			return ResponseEntity.ok(GeneralResponse.builder()
-					.setStatus("success")
-					.setMessage("查詢成功")
-					.setData(stockService.searchForStock(keyWord))
-					.build());
+        	return ResponseUtils.success("success", "查詢成功", stockService.searchForStock(keyWord));
 		}catch(Exception e) {
-			return ResponseEntity.internalServerError()
-					.body(GeneralResponse.builder()
-							.setError(e.getMessage())
-							.setStatus("failed")
-                            .setMessage("查詢失敗")
-							.build());
+			return ResponseUtils.error("failed", "查詢失敗", e);
 		}
 		
 	}
@@ -117,18 +82,9 @@ public class StockController {
 			@RequestParam(name = "userId")int userId,
 			@RequestParam(name = "page")int page) {
 		try {
-			return ResponseEntity.ok(GeneralResponse.builder()
-					.setStatus("success")
-					.setMessage("查詢成功")
-					.setData(stockService.queryStockHolding(page,userId))
-					.build());
+			return ResponseUtils.success("success", "查詢成功", stockService.queryStockHolding(page,userId));
 		}catch(Exception e) {
-			return ResponseEntity.internalServerError()
-					.body(GeneralResponse.builder()
-							.setError(e.getMessage())
-							.setStatus("failed")
-							.setMessage("查詢持股錯誤")
-							.build());
+			return ResponseUtils.error("failed", "查詢持股錯誤", e);
 		}
 		
 	}
@@ -140,18 +96,9 @@ public class StockController {
 			@RequestParam(name = "stockHoldingNo")int stockHoldingNo,
 			@RequestParam(name = "page")int page) {
 		try {
-			return ResponseEntity.ok(GeneralResponse.builder()
-					.setStatus("success")
-					.setMessage("查詢成功")
-					.setData(stockService.queryStockHoldingDetails(page,stockHoldingNo))
-					.build());
+			return ResponseUtils.success("success", "查詢成功", stockService.queryStockHoldingDetails(page,stockHoldingNo));
 		}catch(Exception e) {
-			return ResponseEntity.internalServerError()
-					.body(GeneralResponse.builder()
-							.setError(e.getMessage())
-							.setStatus("failed")
-							.setMessage("查詢持股明細錯誤")
-							.build());
+			return ResponseUtils.error("failed", "查詢持股明細錯誤", e);
 		}
 		
 	}
@@ -161,18 +108,9 @@ public class StockController {
 			,produces = "application/json")
 	public ResponseEntity<GeneralResponse> queryStockHoldingDetails() {
 		try {
-			return ResponseEntity.ok(GeneralResponse.builder()
-					.setStatus("success")
-					.setMessage("查詢成功")
-					.setData(stockService.getTwStockMonthData())
-					.build());
+			return ResponseUtils.success("success", "查詢成功", stockService.getTwStockMonthData());
 		}catch(Exception e) {
-			return ResponseEntity.internalServerError()
-					.body(GeneralResponse.builder()
-							.setError(e.getMessage())
-							.setStatus("failed")
-							.setMessage("資料發生錯誤")
-							.build());
+			return ResponseUtils.error("failed", "資料發生錯誤", e);
 		}
 		
 	}
@@ -183,18 +121,9 @@ public class StockController {
 	public ResponseEntity<GeneralResponse> getCurrentPrice(@RequestParam(name = "stockCodes") String stockCodes) {
 		try {
 			String[] stockCodeArray = stockCodes.split(",");
-			return ResponseEntity.ok(GeneralResponse.builder()
-					.setStatus("success")
-					.setMessage("查詢成功")
-					.setData(stockService.getCurrentPrice(stockCodeArray))
-					.build());
+			return ResponseUtils.success("success", "查詢成功", stockService.getCurrentPrice(stockCodeArray));
 		}catch(Exception e) {
-			return ResponseEntity.internalServerError()
-					.body(GeneralResponse.builder()
-							.setError(e.getMessage())
-							.setStatus("failed")
-							.setMessage("資料發生錯誤")
-							.build());
+			return ResponseUtils.error("failed", "資料發生錯誤", e);
 		}
 		
 	}
@@ -206,18 +135,9 @@ public class StockController {
 			@RequestParam(name = "userId") int userId,
 			@RequestParam(name = "page") int page) {
 		try {
-			return ResponseEntity.ok(GeneralResponse.builder()
-					.setStatus("success")
-					.setMessage("查詢成功")
-					.setData(stockService.getStockTransactionHistory(userId,page))
-					.build());
+			return ResponseUtils.success("success", "查詢成功", stockService.getStockTransactionHistory(userId,page));
 		}catch(Exception e) {
-			return ResponseEntity.internalServerError()
-					.body(GeneralResponse.builder()
-							.setError(e.getMessage())
-							.setStatus("failed")
-							.setMessage("資料發生錯誤")
-							.build());
+			return ResponseUtils.error("failed", "資料發生錯誤", e);
 		}
 		
 	}
