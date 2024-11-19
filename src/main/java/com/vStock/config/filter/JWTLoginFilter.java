@@ -18,8 +18,6 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
-import com.fasterxml.jackson.core.exc.StreamReadException;
-import com.fasterxml.jackson.databind.DatabindException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vStock.json.LoginJson;
 
@@ -55,7 +53,6 @@ public class JWTLoginFilter extends UsernamePasswordAuthenticationFilter{
 		logger.debug("Password: "+request.getParameter("password"));
 		LoginJson loginJson = null;
 		try {
-//			loginJson = objectMapper.readValue(request.getReader().lines().reduce(new String(),String::concat), LoginJson.class);
 			loginJson = objectMapper.readValue(request.getReader(), LoginJson.class);
 		} catch (Exception e) {
 			e.printStackTrace();

@@ -34,7 +34,7 @@ import io.jsonwebtoken.SignatureAlgorithm;
 @Service
 public class GoogleUserService {
 	
-	private static final Logger logger = LogManager.getLogger(StockService.class);
+	private static final Logger logger = LogManager.getLogger(GoogleUserService.class);
 	
 	@Autowired
 	private GoogleUserDao googleUserDao;

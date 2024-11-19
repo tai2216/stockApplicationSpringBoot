@@ -70,19 +70,7 @@ public class LoginController {
 				.message("Log In Success")
 				.build());
 	}
-	
-//	@RequestMapping(value = "/testGoogleApi"
-//			,method = {RequestMethod.POST}
-//			,produces = "application/json")
-//	public ResponseEntity<LoginResponse> testGoogleApi(@RequestBody String body,HttpServletRequest req,HttpServletResponse res){
-//		try {
-//			System.out.println("requestBody: "+body);
-//			
-//		} catch (Exception e) {
-//			e.printStackTrace();
-//		}
-//		return null;
-//	}
+
 	
 	
 	
