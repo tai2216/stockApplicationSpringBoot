@@ -18,9 +18,10 @@ import org.springframework.format.annotation.DateTimeFormat;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
-//@NoArgsConstructor
+@NoArgsConstructor
 @AllArgsConstructor(access = lombok.AccessLevel.PUBLIC)
 @Builder(access = lombok.AccessLevel.PUBLIC,setterPrefix = "set")
 @Entity

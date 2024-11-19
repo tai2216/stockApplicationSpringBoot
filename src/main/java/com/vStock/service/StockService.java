@@ -11,7 +11,9 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
@@ -66,32 +68,6 @@ public class StockService {
 	private RestTemplate restTemplate;
 	
 	private static List<StockModel2> twStockMonthData;
-	
-	/*
-	 * 取得台股近一個月大盤的收盤價資料提供給首頁的圖表使用
-	 * */
-	public List<StockModel2> getTwStockMonthData() {
-		java.util.Date today = new java.util.Date();
-        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd");
-		if (formattedDate != null && formattedDate.equals(dateFormat.format(today))) {
-			logger.debug("今日已取得證交所API台股近月收盤價資料");
-			return twStockMonthData;
-        }
-        formattedDate = dateFormat.format(today);
-		StockModel stockModel = this.restTemplate
-				.getForObject("https://www.twse.com.tw/rwd/zh/afterTrading/FMTQIK?date="+formattedDate+"&response=json"
-				, StockModel.class);
-		List<StockModel2> list = new ArrayList<>();
-		for (String[] s : stockModel.getData()) {
-			list.add(StockModel2.builder()
-					.date(s[0])
-					.price(s[4])
-					.build());
-		}
-		twStockMonthData = list;
-		logger.debug("取得證交所API台股近月收盤價資料成功");
-		return twStockMonthData;
-	}
 	
 	private static String formattedDate;
 	
@@ -486,5 +462,67 @@ public class StockService {
 		}
 		return false;
 	}
+	
+	/*
+	 * 取得現價用來計算損益
+	 * */
+	public Map<String,String> getCurrentPrice(String...stockCodes){
+		try {
+			for(String s : stockCodes) {
+				if(s==null|| s.isEmpty() || s.isBlank()) {
+					throw new RuntimeException("股票代碼不可為空");
+				}
+			}
+			List<String[]> findPriceByStockCodes = twt84uDao.findPriceByStockCodes(stockCodes);
+			Map<String,String> map = new HashMap<>();
+			for (String[] obj : findPriceByStockCodes) {
+				map.put(obj[0], obj[1]);
+			}
+			return map;
+		}catch(Exception e) {
+			e.printStackTrace();
+			return new HashMap<>();
+		}
+	}
+	
+	/*
+	 * 取得台股近一個月大盤的收盤價資料提供給首頁的圖表使用
+	 * */
+	public List<StockModel2> getTwStockMonthData() {
+		java.util.Date today = new java.util.Date();
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd");
+		if (formattedDate != null && formattedDate.equals(dateFormat.format(today))) {
+			logger.debug("今日已取得證交所API台股近月收盤價資料");
+			return twStockMonthData;
+        }
+        formattedDate = dateFormat.format(today);
+		StockModel stockModel = this.restTemplate
+				.getForObject("https://www.twse.com.tw/rwd/zh/afterTrading/FMTQIK?date="+formattedDate+"&response=json"
+				, StockModel.class);
+		List<StockModel2> list = new ArrayList<>();
+		for (String[] s : stockModel.getData()) {
+			list.add(StockModel2.builder()
+					.date(s[0])
+					.price(s[4])
+					.build());
+		}
+		twStockMonthData = list;
+		logger.debug("取得證交所API台股近月收盤價資料成功");
+		return twStockMonthData;
+	}
+	
+	public Page<StockTransaction> getStockTransactionHistory(int userId, int page){
+		try {
+			List<StockTransaction> result = stockTransactionDao.findByUserId(userId,page ==0? 0:page+14)
+					.orElseThrow(()->new RuntimeException("查無此使用者交易紀錄"));
+			Pageable pageable = PageRequest.of(page, 15,Sort.by("SERIAL_NUMBER").ascending());//stockHoldingDetailsDao.findCountByFkStockHoldingNo(stockHoldingNo)
+			return new PageImpl<>(result, pageable
+					,page !=0 ?
+					result.size()+1 : stockTransactionDao.findCountByUserId(userId));
+		}catch(Exception e) {
+			throw new RuntimeException(e.getMessage());
+		}
+	}
+	
 
 }

@@ -101,7 +101,7 @@ public class JWTLoginFilter extends UsernamePasswordAuthenticationFilter{
 					.setIssuer("Sam")
 					.setSubject(((org.springframework.security.core.userdetails.User) authResult.getPrincipal()).getUsername())
 					.setExpiration(new Date(System.currentTimeMillis() + 60 * 60 * 24 * 1000))
-					.signWith(SignatureAlgorithm.HS512, jwtSecretKey)//todo:在啟動時產生密鑰交由porperties檔案管理
+					.signWith(SignatureAlgorithm.HS512, jwtSecretKey)
 					.compact();
 			logger.debug(token);
 			response.addHeader("loginUserName", authResult.getName());

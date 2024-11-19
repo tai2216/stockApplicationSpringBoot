@@ -177,6 +177,51 @@ public class StockController {
 		
 	}
 	
+	@RequestMapping(method = RequestMethod.GET
+			,value = "/getCurrentPrice"
+			,produces = "application/json")
+	public ResponseEntity<GeneralResponse> getCurrentPrice(@RequestParam(name = "stockCodes") String stockCodes) {
+		try {
+			String[] stockCodeArray = stockCodes.split(",");
+			return ResponseEntity.ok(GeneralResponse.builder()
+					.setStatus("success")
+					.setMessage("查詢成功")
+					.setData(stockService.getCurrentPrice(stockCodeArray))
+					.build());
+		}catch(Exception e) {
+			return ResponseEntity.internalServerError()
+					.body(GeneralResponse.builder()
+							.setError(e.getMessage())
+							.setStatus("failed")
+							.setMessage("資料發生錯誤")
+							.build());
+		}
+		
+	}
+	
+	@RequestMapping(method = RequestMethod.GET
+			,value = "/getTransactionHistory"
+			,produces = "application/json")
+	public ResponseEntity<GeneralResponse> getTransactionHistory(
+			@RequestParam(name = "userId") int userId,
+			@RequestParam(name = "page") int page) {
+		try {
+			return ResponseEntity.ok(GeneralResponse.builder()
+					.setStatus("success")
+					.setMessage("查詢成功")
+					.setData(stockService.getStockTransactionHistory(userId,page))
+					.build());
+		}catch(Exception e) {
+			return ResponseEntity.internalServerError()
+					.body(GeneralResponse.builder()
+							.setError(e.getMessage())
+							.setStatus("failed")
+							.setMessage("資料發生錯誤")
+							.build());
+		}
+		
+	}
+	
 
 	
 	

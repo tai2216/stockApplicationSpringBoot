@@ -15,6 +15,7 @@ import com.vStock.config.filter.JWTAuthenticationFilter;
 import com.vStock.config.filter.JWTLoginFilter;
 import com.vStock.dao.JwtSecretKeyDao;
 import com.vStock.model.JwtSecretKey;
+import com.vStock.service.GoogleUserService;
 import com.vStock.util.KeyUtils;
 
 //繼承 WebSecurityConfigurerAdapter才可自訂登入邏輯
@@ -28,6 +29,9 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter{
 	
 	@Autowired
 	private UserDetailsService service;
+	
+	@Autowired
+	private GoogleUserService googleUserService;
 
 	@Override
 	protected void configure(HttpSecurity http) throws Exception {
@@ -36,6 +40,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter{
 			jwtSecretKeyDao.deleteAll();
 			jwtSecretKeyDao.flush();
 			String jwtSecretkey = KeyUtils.generateKey(50, 200);
+			googleUserService.setJwtSecretKey(jwtSecretkey);
 			jwtSecretKeyDao.save(JwtSecretKey.builder()
 											.id(1)
 											.jwtKey(jwtSecretkey)
@@ -49,7 +54,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter{
 //			.*: Matches any character (.) zero or more times (*).
 //			?: Makes the preceding group (\?.*) optional.
 //			.antMatchers("/login","/checkLogin","/oauth2/authorization/google","/register","/enableUser(\\?.*)?")
-			.regexMatchers("/login","/checkLogin","/oauth2/authorization/google","/register","/enableUser","/enableUser/(\\?.*)?")
+			.regexMatchers("/login","/checkLogin","/register","/enableUser","/enableUser/(\\?.*)?","/googleLogin")
 			.permitAll()
 			.antMatchers("/css/**/**","/images/**/**","/js/**","/default/**","/layout/**","/img/**","/Message/**")
 			.permitAll()

@@ -20,6 +20,11 @@ public interface Twt84uDao extends JpaRepository<TWT84U, Integer>, PagingAndSort
 	public Optional<TWT84U> findByStockCode(String stockCode);
 	
 	@Query(nativeQuery = true
+			, value = "SELECT CODE, PREVIOUS_DAY_PRICE FROM TWT84U WHERE CODE IN (:stockCodes)")
+	@Transactional(readOnly = true)
+	public List<String[]> findPriceByStockCodes(String... stockCodes);
+	
+	@Query(nativeQuery = true
 			, value = "SELECT * FROM TWT84U WHERE CODE LIKE CONCAT('%',:keyWord,'%') OR NAME LIKE CONCAT('%',:keyWord,'%')")
 	@Transactional(readOnly = true)
 	public List<TWT84U> findByCodeOrName(String keyWord);

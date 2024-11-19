@@ -43,8 +43,8 @@ public class NormalUser {
 	private int id;
 	
 	@NotEmpty
-	@Size(min=8, max=30)
-	@Column(name = "USERNAME",unique = true,columnDefinition = "NVARCHAR(30)",nullable = false)
+	@Size(min=8, max=200)
+	@Column(name = "USERNAME",unique = true,columnDefinition = "NVARCHAR(200)",nullable = false)
 	private String username;
 	
 	@NotEmpty
@@ -56,11 +56,11 @@ public class NormalUser {
 //	@ColumnDefault(value = "'NORMAL'")
 	private String userRole;
 	
-	@Column(name = "EMAIL",columnDefinition = "NVARCHAR(200)",nullable = false)
+	@Column(name = "EMAIL",columnDefinition = "NVARCHAR(100)",nullable = false)
 	@Size(min=8, max=200)
 	private String email;
 	
-	@Column(name = "PHONE",columnDefinition = "NVARCHAR(50)")
+	@Column(name = "PHONE",columnDefinition = "NVARCHAR(20)")
 	@ColumnDefault(value = "'0917648234'")
 	private String phone;//還不確定需不需要這個欄位目前暫時保留
 	

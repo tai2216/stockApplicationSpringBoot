@@ -1,10 +1,11 @@
 package com.vStock;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import org.junit.jupiter.api.MethodOrderer.OrderAnnotation;
-
-import java.text.SimpleDateFormat;
-import java.util.Date;
-
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
@@ -90,17 +91,35 @@ public class StockApiTest {
 //		System.out.println(objectMapper.writeValueAsString(p));
 //    }
 	
+//	@Test
+//	@Order(6)
+//	void testApiTW() throws JsonProcessingException {
+//        Date today = new Date();
+//        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd");
+//        String formattedDate = dateFormat.format(today);
+//		StockModel model = restTemplate.getForObject("https://www.twse.com.tw/rwd/zh/afterTrading/FMTQIK?date="+formattedDate+"&response=json"
+//				, StockModel.class);
+//		ObjectMapper mapper = new ObjectMapper();
+//		System.out.println(mapper.writeValueAsString(model));
+//		
+//	}
+	
 	@Test
-	@Order(6)
-	void testApiTW() throws JsonProcessingException {
-        Date today = new Date();
-        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd");
-        String formattedDate = dateFormat.format(today);
-		StockModel model = restTemplate.getForObject("https://www.twse.com.tw/rwd/zh/afterTrading/FMTQIK?date="+formattedDate+"&response=json"
-				, StockModel.class);
-		ObjectMapper mapper = new ObjectMapper();
-		System.out.println(mapper.writeValueAsString(model));
-		
+	@Order(7)
+	void testTwt84u() throws JsonProcessingException {
+		try {
+			List<String[]> findPriceByStockCodes = twt84uDao.findPriceByStockCodes("0050","0051","2330");
+			Map<String,String> map = new HashMap<>();
+			for (String[] obj : findPriceByStockCodes) {
+				map.put(obj[0], obj[1]);
+			}
+			ObjectMapper mapper = new ObjectMapper();
+			System.out.println(mapper.writeValueAsString(map));
+			System.out.println(mapper.writeValueAsString(findPriceByStockCodes));
+			
+		}catch(Exception e) {
+			e.printStackTrace();
+		}
 	}
 	
 }
