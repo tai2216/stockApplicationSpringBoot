@@ -10,9 +10,9 @@ public class ResponseUtils {
 	public static ResponseEntity<GeneralResponse> error(String status,String message,Exception e){
 		return ResponseEntity.internalServerError()
 				.body(GeneralResponse.builder()
+						.setStatus(status)
+						.setMessage(message)
 						.setError(e.getMessage())
-						.setStatus("failed")
-						.setMessage("交易失敗")
 						.build());
 	}
 	
