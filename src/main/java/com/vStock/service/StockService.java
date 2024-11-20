@@ -443,7 +443,7 @@ public class StockService {
 					.setTransactionType(type.toString())
 					.build());
 		}catch(Exception e) {
-			e.printStackTrace();
+//			e.printStackTrace();
 			logger.error("交易失敗", e.getMessage());
 			if(StringUtils.hasText(e.getMessage())) {
 				throw e;

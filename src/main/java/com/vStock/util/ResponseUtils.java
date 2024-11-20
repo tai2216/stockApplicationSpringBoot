@@ -11,7 +11,7 @@ public class ResponseUtils {
 		return ResponseEntity.internalServerError()
 				.body(GeneralResponse.builder()
 						.setStatus(status)
-						.setMessage(message)
+						.setMessage(message.lines().findFirst().get())
 						.setError(e.getMessage())
 						.build());
 	}
