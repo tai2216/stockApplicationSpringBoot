@@ -92,6 +92,9 @@ public class StockService {
 	@Value("${spring.mail.username}")
 	private String developerEmail;
 	
+	@Value("${getStockDataOnInit}")
+	private String getStockDataOnInit;
+	
 	private String[] columnNameArray = {
 			"Code", "Name", "TodayLimitUp", "TodayOpeningRefPrice", "TodayLimitDown", "PreviousDayOpeningRefPrice",
 			"PreviousDayPrice", "PreviousDayLimitUp", "PreviousDayLimitDown", "LastTradingDay",
@@ -111,7 +114,7 @@ public class StockService {
 	@Scheduled(fixedRate = 8,timeUnit = TimeUnit.HOURS,zone = "Asia/Taipei")
 	@Transactional
 	public void testSchedule() {
-		if("1".equals("1")) {//測試開發時使用，不須每次啟動都執行
+		if("false".equals(getStockDataOnInit)) {//測試開發時使用，不須每次啟動都執行
 			logger.debug("排程測試今日已執行");
 			return;
 		}

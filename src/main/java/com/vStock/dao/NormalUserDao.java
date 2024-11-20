@@ -45,6 +45,11 @@ public interface NormalUserDao extends JpaRepository<NormalUser, Integer>{
 	public void updateRemarkByUsername(String username, String remark);
 	
 	@Query(nativeQuery = true
+			, value = "UPDATE NORMAL_USER SET PASSWORD = :newPassword WHERE USER_ID = :id")
+	@Modifying(clearAutomatically = true, flushAutomatically = true)
+	public void updatePassword(int id, String newPassword);
+	
+	@Query(nativeQuery = true
 			, value = "UPDATE NORMAL_USER SET ENABLED = 0 WHERE USER_ID = :id")
 	@Modifying(clearAutomatically = true, flushAutomatically = true)
 	public void disableUser(int id);
