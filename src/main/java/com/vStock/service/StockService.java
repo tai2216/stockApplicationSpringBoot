@@ -119,10 +119,11 @@ public class StockService {
 			return;
 		}
 		try {
-			logger.debug("排程測試，取得最新證交所API資料...請稍後");
+			logger.debug("取得最新證交所API資料...請稍後");
 			ObjectMapper mapper = new ObjectMapper();
 			String result = this.getStockInfo();
 			List<TWT84U> table = mapper.readValue(result, new TypeReference<List<TWT84U>>() {});
+			table = table.stream().filter(twt-> (!twt.getPreviousDayPrice().equals("0")) & StringUtils.hasText(twt.getPreviousDayPrice())).collect(Collectors.toList());
 			logger.debug("執行清空資料庫股票資訊(Table名稱:TWT84U)...請稍後");
 			twt84uDao.deleteAll();
 			twt84uDao.flush();
