@@ -104,7 +104,7 @@ public class NormalUserService{
 		forgotPasswordVerifyCodeDao.flush();
 	}
 	
-	@Transactional
+	@Transactional(rollbackFor = Exception.class)
 	public void sendForgotPasswordEmail(String email) {
 		Optional<NormalUser> user = normalUserDao.findByEmail(email);
 		try {
@@ -140,7 +140,7 @@ public class NormalUserService{
 		}
 	}
 
-	@Transactional
+	@Transactional(rollbackFor = Exception.class)
 	public void registerUser(HttpServletRequest req, HttpServletResponse res) {
 		try {
 			LoginJson loginJson = null;
@@ -194,7 +194,7 @@ public class NormalUserService{
 		}
 	}
 
-	@Transactional
+	@Transactional(rollbackFor = Exception.class)
 	public void enableUser(HttpServletRequest req, HttpServletResponse res) {
 		Optional<NormalUser> user = null;
 		String username = req.getParameter("username");

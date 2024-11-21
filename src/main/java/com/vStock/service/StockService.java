@@ -112,7 +112,7 @@ public class StockService {
 	}
 	
 	@Scheduled(fixedRate = 8,timeUnit = TimeUnit.HOURS,zone = "Asia/Taipei")
-	@Transactional
+	@Transactional(rollbackFor = Exception.class)
 	public void testSchedule() {
 		if("false".equals(getStockDataOnInit)) {//測試開發時使用，不須每次啟動都執行
 			logger.debug("排程測試今日已執行");
@@ -300,7 +300,7 @@ public class StockService {
 	    logger.debug("證交所API檔案已輸出至路徑: "+path);
 	}
 	
-	@Transactional
+	@Transactional(rollbackFor = Exception.class)
 	public StockTransaction buyOrSellStock(TransactionType type
 											,@NotEmpty int userId
 					                        ,@NotEmpty int quantity

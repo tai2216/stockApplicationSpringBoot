@@ -57,6 +57,7 @@ public class GoogleUserService {
 	@Value("${spring.security.oauth2.client.registration.google.client-secret}")
 	private String clientSecret;
 	
+	@Transactional(rollbackFor = Exception.class)
 	public void googleLoginFlow(String reqBody,HttpServletRequest request, HttpServletResponse response) {
 		try {
 //			logger.debug(reqBody);
@@ -82,14 +83,12 @@ public class GoogleUserService {
 			}
 		}catch(Exception e) {
 			e.printStackTrace();
-			response.addHeader("GoogleLogInError", e.getMessage());
-			response.setStatus(HttpServletResponse.SC_FORBIDDEN);
 			logger.error("google 驗證失敗");
-			
+			throw new RuntimeException(e.getMessage());
 		}
 	}
 	
-	@Transactional
+	@Transactional(rollbackFor = Exception.class)
 	public GoogleUser verifyGoogleToken(String googleCredential) {
 		try {
 			GoogleIdTokenVerifier verifier = new GoogleIdTokenVerifier

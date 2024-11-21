@@ -5,6 +5,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -33,10 +34,14 @@ public class LoginController {
 	public ResponseEntity<LoginResponse> login(HttpServletRequest req
 											  ,HttpServletResponse res){
 		String authResult = res.getHeader("LogInError");
-		if (authResult != null) {
+		if (StringUtils.hasText(authResult)) {
 			return ResponseEntity.status(403).body(LoginResponse.builder().message(authResult).build());
 		}
-		normalUserService.updateLoginDate(res.getHeader("loginUserName"));
+		try {
+			normalUserService.updateLoginDate(res.getHeader("loginUserName"));
+		}catch(Exception e) {
+			return ResponseEntity.status(403).body(LoginResponse.builder().message(e.getMessage()).build());
+		}
         return ResponseEntity.ok(
 				LoginResponse.builder()
 				.userId(normalUserDao.findByUsername(res.getHeader("loginUserName")).get().getId())
@@ -53,12 +58,12 @@ public class LoginController {
 	public ResponseEntity<LoginResponse> googleLogin(@RequestBody String body
 													,HttpServletRequest req
 													,HttpServletResponse res){
-		googleUserService.googleLoginFlow(body,req, res);
-		String authResult = res.getHeader("GoogleLogInError");
-		if (authResult != null) {
-			return ResponseEntity.status(403).body(LoginResponse.builder().message(authResult).build());
+		try {
+			googleUserService.googleLoginFlow(body,req, res);
+			normalUserService.updateLoginDate(res.getHeader("loginUserName"));
+		}catch(Exception e) {
+			return ResponseEntity.status(403).body(LoginResponse.builder().message(e.getMessage()).build());
 		}
-		normalUserService.updateLoginDate(res.getHeader("loginUserName"));
 		return ResponseEntity.ok(
 				LoginResponse.builder()
 				.userId(normalUserDao.findByUsername(res.getHeader("loginUserName")).get().getId())
