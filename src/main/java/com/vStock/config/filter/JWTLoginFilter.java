@@ -11,6 +11,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -20,6 +21,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vStock.json.LoginJson;
+import com.vStock.model.LoginResponse;
 
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
@@ -49,19 +51,12 @@ public class JWTLoginFilter extends UsernamePasswordAuthenticationFilter{
 		logger.debug("req content type: "+request.getContentType());
 		logger.debug("req encoding: "+request.getCharacterEncoding());
 		logger.debug("req content length: "+request.getContentLength());
-		logger.debug("User Name: "+request.getParameter("username"));
-		logger.debug("Password: "+request.getParameter("password"));
 		LoginJson loginJson = null;
-		try {
-			loginJson = objectMapper.readValue(request.getReader(), LoginJson.class);
-		} catch (Exception e) {
-			e.printStackTrace();
-			logger.error("登入資訊有誤: "+e.getMessage());
-		}
-		if(loginJson==null) {
-			throw new RuntimeException("Log in Json parse error");
-		}
 		try {	
+			loginJson = objectMapper.readValue(request.getReader(), LoginJson.class);
+			if(loginJson==null) {
+				throw new RuntimeException("Log in Json parse error");
+			}
 		    Authentication authenticate = authenticationManager.authenticate(
 										    new UsernamePasswordAuthenticationToken(
 										    loginJson.getUsername(),
@@ -72,10 +67,19 @@ public class JWTLoginFilter extends UsernamePasswordAuthenticationFilter{
 		    logger.debug("isAuthenticated: "+authenticate.isAuthenticated());
 		    logger.debug("toString: "+authenticate.toString());
 		    return authenticate;
-	    }catch(AuthenticationException ae) {
-			response.addHeader("LogInError", ae.getMessage());
+	    }catch(Exception e) {
+			response.addHeader("LogInError", e.getMessage());
 			response.setStatus(HttpServletResponse.SC_FORBIDDEN);
-		    logger.error("JWTLoginFilter: 使用者"+request.getParameter("username")+"驗證失敗: "+ae.getMessage());
+			logger.error("JWTLoginFilter: 使用者"+request.getParameter("username")+"驗證失敗: "+e.getMessage());
+			try {
+				response.setContentType("application/json");
+				response.setCharacterEncoding("UTF-8");
+				ObjectMapper mapper = new ObjectMapper();
+				response.getWriter().print(mapper.writeValueAsString(LoginResponse.builder().message(e.getMessage()).build()));
+				response.getWriter().flush();
+			} catch (IOException ioe) {
+				e.printStackTrace();
+			}
 //		    throw ae;
 		    return null;
 	    }
