@@ -59,10 +59,10 @@ public class GoogleUserService {
 	
 	public void googleLoginFlow(String reqBody,HttpServletRequest request, HttpServletResponse response) {
 		try {
-			logger.debug(reqBody);
+//			logger.debug(reqBody);
 			ObjectMapper objectMapper = new ObjectMapper();
 			com.vStock.model.GoogleCredential credential = objectMapper.readValue(reqBody, GoogleCredential.class);
-			logger.debug("google credential: "+credential.getCredential());
+//			logger.debug("google credential: "+credential.getCredential());
 			GoogleUser googleUser = verifyGoogleToken(credential.getCredential());
 			if(googleUser!=null) {
 				String token = Jwts.builder()
@@ -71,7 +71,7 @@ public class GoogleUserService {
 						.setExpiration(new Date(System.currentTimeMillis() + 60 * 60 * 24 * 1000))
 						.signWith(SignatureAlgorithm.HS512, jwtSecretKey)
 						.compact();
-				logger.debug("google login token: "+token);
+//				logger.debug("google login token: "+token);
 				response.addHeader("loginUserName", googleUser.getUsername());
 				response.addHeader("googleName", googleUser.getName());
 				response.addHeader("googlePicture", googleUser.getPictureUrl());
@@ -82,7 +82,7 @@ public class GoogleUserService {
 			}
 		}catch(Exception e) {
 			e.printStackTrace();
-			response.addHeader("Google Log In Error", e.getMessage());
+			response.addHeader("GoogleLogInError", e.getMessage());
 			response.setStatus(HttpServletResponse.SC_FORBIDDEN);
 			logger.error("google 驗證失敗");
 			

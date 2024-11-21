@@ -32,7 +32,7 @@ public class LoginController {
 					,produces = "application/json")
 	public ResponseEntity<LoginResponse> login(HttpServletRequest req
 											  ,HttpServletResponse res){
-		String authResult = res.getHeader("Log In Error");
+		String authResult = res.getHeader("LogInError");
 		if (authResult != null) {
 			return ResponseEntity.status(403).body(LoginResponse.builder().message(authResult).build());
 		}
@@ -54,7 +54,7 @@ public class LoginController {
 													,HttpServletRequest req
 													,HttpServletResponse res){
 		googleUserService.googleLoginFlow(body,req, res);
-		String authResult = res.getHeader("Google Log In Error");
+		String authResult = res.getHeader("GoogleLogInError");
 		if (authResult != null) {
 			return ResponseEntity.status(403).body(LoginResponse.builder().message(authResult).build());
 		}

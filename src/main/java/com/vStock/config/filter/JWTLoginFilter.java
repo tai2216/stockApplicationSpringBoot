@@ -73,7 +73,7 @@ public class JWTLoginFilter extends UsernamePasswordAuthenticationFilter{
 		    logger.debug("toString: "+authenticate.toString());
 		    return authenticate;
 	    }catch(AuthenticationException ae) {
-			response.addHeader("Log In Error", ae.getMessage());
+			response.addHeader("LogInError", ae.getMessage());
 			response.setStatus(HttpServletResponse.SC_FORBIDDEN);
 		    logger.error("JWTLoginFilter: 使用者"+request.getParameter("username")+"驗證失敗: "+ae.getMessage());
 //		    throw ae;

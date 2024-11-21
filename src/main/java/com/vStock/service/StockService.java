@@ -495,7 +495,7 @@ public class StockService {
 		java.util.Date today = new java.util.Date();
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd");
 		if (formattedDate != null && formattedDate.equals(dateFormat.format(today))) {
-			logger.debug("今日已取得證交所API台股近月收盤價資料");
+//			logger.debug("今日已取得證交所API台股近月收盤價資料");
 			return twStockMonthData;
         }
         formattedDate = dateFormat.format(today);

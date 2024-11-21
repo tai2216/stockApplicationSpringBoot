@@ -1,6 +1,9 @@
 package com.vStock.config;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
@@ -32,19 +35,38 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter{
 	
 	@Autowired
 	private GoogleUserService googleUserService;
+	
+	@Value("${getJwtSecretKeyOnInit}")
+	private boolean getJwtSecretKeyOnInit;
 
 	@Override
 	protected void configure(HttpSecurity http) throws Exception {
 		try {
-			//每次啟動應用都會重新生成一組jwtSecretKey並存入資料庫提供測試時使用
-			jwtSecretKeyDao.deleteAll();
-			jwtSecretKeyDao.flush();
-			String jwtSecretkey = KeyUtils.generateKey(50, 200);
+			String jwtSecretkey = null;
+			//啟動應用時可透過applictionProperties來決定要不要生成新的secret
+			if(getJwtSecretKeyOnInit) {
+				jwtSecretKeyDao.deleteAll();
+				jwtSecretKeyDao.flush();
+				jwtSecretkey = KeyUtils.generateKey(50, 200);
+				jwtSecretKeyDao.save(JwtSecretKey.builder().jwtKey(jwtSecretkey).build());
+				jwtSecretKeyDao.flush();
+			}else {
+				List<JwtSecretKey> list = jwtSecretKeyDao.findAll();
+				if(list.size()==0) {
+					jwtSecretkey = KeyUtils.generateKey(50, 200);
+					jwtSecretKeyDao.save(JwtSecretKey.builder().jwtKey(jwtSecretkey).build());
+					jwtSecretKeyDao.flush();
+				}else if(list.size()==1){
+					jwtSecretkey = jwtSecretKeyDao.findAll().get(0).getJwtKey();
+				}else{
+					jwtSecretKeyDao.deleteAll();
+					jwtSecretKeyDao.flush();
+					jwtSecretkey = KeyUtils.generateKey(50, 200);
+					jwtSecretKeyDao.save(JwtSecretKey.builder().jwtKey(jwtSecretkey).build());
+					jwtSecretKeyDao.flush();
+				}
+			}
 			googleUserService.setJwtSecretKey(jwtSecretkey);
-			jwtSecretKeyDao.save(JwtSecretKey.builder()
-											.id(1)
-											.jwtKey(jwtSecretkey)
-											.build());
 			http
 			.authorizeRequests()
 //			The pattern /enableUser(\\?.*)? is a regular expression used to match the /enableUser path with optional query parameters. Here's a breakdown of the pattern:
