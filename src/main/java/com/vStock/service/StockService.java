@@ -59,6 +59,7 @@ import com.vStock.model.StockModel2;
 import com.vStock.model.StockTransaction;
 import com.vStock.model.TWT84U;
 import com.vStock.other.TransactionType;
+import com.vStock.util.StockUtils;
 
 @Service
 public class StockService {
@@ -327,7 +328,18 @@ public class StockService {
 			if(account.get().isFrozen()) {
 				throw new RuntimeException("此使用者存款帳戶已被凍結");
 			}
-			BigDecimal cost = new BigDecimal(price * quantity);
+			if(quantity<=0) {
+				throw new RuntimeException("交易數量不得小於等於零");
+			}
+			long serviceCharge = StockUtils.countServiceCharge(price*quantity);
+			long tax = 0;
+			BigDecimal cost = null;
+			if (TransactionType.SELL == type) {//只有賣出時才收證交稅0.3%其餘時間為0
+				tax = StockUtils.countTax(price * quantity);
+				cost = new BigDecimal((price * quantity)-serviceCharge-tax);
+			}else if(TransactionType.BUY == type) {
+				cost = new BigDecimal((price * quantity)+serviceCharge);
+			}
 			BigDecimal balance = account.get().getBalance();
 			Optional<StockHolding> stockHoldingO = stockHoldingDao.findByFkUserIdAndStockCode(userId, stockCode);
 			if(TransactionType.BUY==type) {//買的話就減帳戶的錢
@@ -343,7 +355,7 @@ public class StockService {
 				}
 				StockHolding stockHolding = stockHoldingO.get();
 				if (stockHolding.getTotalQuantity() < quantity) {
-					throw new RuntimeException("持有單位不足: " + stockHolding.getTotalQuantity());
+					throw new RuntimeException("持有數量不足");
 				}
 				if (cost.compareTo(balance) >=1) {
 					throw new RuntimeException("賣出的金額有誤，餘額為: "+balance
@@ -440,6 +452,8 @@ public class StockService {
 					.setStockCode(stockCode)
 					.setQuantity(TransactionType.BUY==type? quantity: -quantity)
 					.setPrice(TransactionType.BUY==type? price : -price)
+					.setServiceCharge(serviceCharge)
+					.setTax(tax)
 					.setTransactionDate(new Date(System.currentTimeMillis()))
 					.setTransactionType(type.toString())
 					.build());

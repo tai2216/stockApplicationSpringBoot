@@ -46,6 +46,12 @@ public class StockTransaction {
 	@Column(name = "PRICE")
 	private double price;
 	
+	@Column(name = "SERVICE_CHARGE")
+	private long serviceCharge;
+	
+	@Column(name = "TAX")
+	private long tax;
+	
 	@Column(name = "QUANTITY")
 	private int quantity;
 	
