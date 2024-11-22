@@ -199,7 +199,7 @@ public class NormalUserService{
 		Optional<NormalUser> user = null;
 		String username = req.getParameter("username");
 		String remark = req.getParameter("remark");
-		System.out.println("username: "+username+" remark: "+remark);
+		logger.debug("username: "+username+" remark: "+remark);
 		if(!StringUtils.hasText(username) | !StringUtils.hasText(remark)) {
 			throw new RuntimeException("非正常的啟用請求");
 		}

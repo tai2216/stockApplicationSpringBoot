@@ -75,7 +75,7 @@ public class JWTLoginFilter extends UsernamePasswordAuthenticationFilter{
 				response.setContentType("application/json");
 				response.setCharacterEncoding("UTF-8");
 				ObjectMapper mapper = new ObjectMapper();
-				response.getWriter().print(mapper.writeValueAsString(LoginResponse.builder().message(e.getMessage()).build()));
+				response.getWriter().print(mapper.writeValueAsString(LoginResponse.builder().message("登入失敗，錯誤訊息: "+e.getMessage()).build()));
 				response.getWriter().flush();
 			} catch (IOException ioe) {
 				e.printStackTrace();
@@ -91,8 +91,15 @@ public class JWTLoginFilter extends UsernamePasswordAuthenticationFilter{
 		UserDetails user = (UserDetails)authResult.getPrincipal();
 		logger.debug("user: "+new ObjectMapper().writeValueAsString(user));
 		if(!user.isEnabled()) {
-			response.addHeader("Log In Error", "This account is not enabled");
-			response.sendError(403, "This account is not enabled");
+			try {
+				response.setContentType("application/json");
+				response.setCharacterEncoding("UTF-8");
+				ObjectMapper mapper = new ObjectMapper();
+				response.getWriter().print(mapper.writeValueAsString(LoginResponse.builder().message("登入失敗，此帳號已被凍結").build()));
+				response.getWriter().flush();
+			} catch (IOException ioe) {
+				ioe.printStackTrace();
+			}
 		}else {
 			logger.debug("Response Header: "+response.getHeader("Access-Control-Allow-Origin"));
 			logger.debug("successful");

@@ -213,21 +213,17 @@ public class StockService {
 	}
 	
 	public Page<StockHolding> queryStockHolding(int page, int userId){
-		List<StockHolding> result = stockHoldingDao.findByFkUserIdToPage(page ==0? 0:page+14,userId)
+		List<StockHolding> result = stockHoldingDao.findByFkUserIdToPage(countPage(page),userId)
 				.orElseThrow(()->new RuntimeException("查無此使用者持股"));
 		Pageable pageable = PageRequest.of(page, 15,Sort.by("SERIAL_NO").ascending());
-		return new PageImpl<>(result,pageable
-				,page !=0 ?
-				result.size()+1:stockHoldingDao.findCountByFkUserId(userId));
+		return new PageImpl<>(result,pageable,stockHoldingDao.findCountByFkUserId(userId));
 	}
 	
 	public Page<StockHoldingDetails> queryStockHoldingDetails(int page, int stockHoldingNo){
-		List<StockHoldingDetails> result = stockHoldingDetailsDao.findByFkStockHoldingNoToPage(page ==0? 0:page+14,stockHoldingNo)
+		List<StockHoldingDetails> result = stockHoldingDetailsDao.findByFkStockHoldingNoToPage(countPage(page),stockHoldingNo)
 				.orElseThrow(()->new RuntimeException("查無此使用者持股明細"));
 		Pageable pageable = PageRequest.of(page, 15,Sort.by("SERIAL_NO").ascending());//stockHoldingDetailsDao.findCountByFkStockHoldingNo(stockHoldingNo)
-		return new PageImpl<>(result, pageable
-				,page !=0 ?
-				result.size()+1 : stockHoldingDetailsDao.findCountByFkStockHoldingNo(stockHoldingNo));
+		return new PageImpl<>(result, pageable,stockHoldingDetailsDao.findCountByFkStockHoldingNo(stockHoldingNo));
 	}
 	
 	/*
@@ -557,15 +553,20 @@ public class StockService {
 	
 	public Page<StockTransaction> getStockTransactionHistory(int userId, int page){
 		try {
-			List<StockTransaction> result = stockTransactionDao.findByUserId(userId,page ==0? 0:page+14)
+			List<StockTransaction> result = stockTransactionDao.findByUserId(userId,countPage(page))
 					.orElseThrow(()->new RuntimeException("查無此使用者交易紀錄"));
 			Pageable pageable = PageRequest.of(page, 15,Sort.by("SERIAL_NUMBER").ascending());//stockHoldingDetailsDao.findCountByFkStockHoldingNo(stockHoldingNo)
-			return new PageImpl<>(result, pageable
-					,page !=0 ?
-					result.size()+1 : stockTransactionDao.findCountByUserId(userId));
+			return new PageImpl<>(result, pageable,stockTransactionDao.findCountByUserId(userId));
 		}catch(Exception e) {
 			throw new RuntimeException(e.getMessage());
 		}
+	}
+	
+	private int countPage(int page) {
+		if(page==0) {
+			return 0;
+		}
+		return page*15;
 	}
 	
 
