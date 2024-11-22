@@ -15,9 +15,6 @@ public class StockUtils {
 	 * */
 	public static long countTax(double price) {
         long calculateResult = Math.round(price * 0.003);
-        if(calculateResult<=0) {
-        	throw new RuntimeException("計算證交稅結果不得小於等於零, 計算結果: "+calculateResult);
-        }
         return calculateResult;
 	}
 	

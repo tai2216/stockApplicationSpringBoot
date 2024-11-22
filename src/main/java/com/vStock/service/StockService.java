@@ -68,7 +68,15 @@ public class StockService {
 	
 	private RestTemplate restTemplate;
 	
+	/*
+	 * 首頁圖表資料一天內為固定因此設為快取
+	 * */
 	private static List<StockModel2> twStockMonthData;
+	
+	/*
+	 * 使用者的股票列表第一頁基本上為固定因此在此設為快取
+	 * */
+	private static Page<TWT84U> firstPageData;
 	
 	private static String formattedDate;
 	
@@ -110,6 +118,13 @@ public class StockService {
 		this.saveApiDataToExcel();//保存歷史資料到excel,目前還無使用規劃但先保存
 //		this.testSchedule();
 //		todo:要加入每日排程去察看當日註冊的使用者帳號沒有啟用的應全部刪除以避免過多無效帳號
+	}
+	
+	@Scheduled(fixedRate = 8,timeUnit = TimeUnit.HOURS,zone = "Asia/Taipei")
+	public void clearCache() {
+		logger.debug("清除股票資料相關快取");
+		twStockMonthData = null;
+		firstPageData=null;
 	}
 	
 	@Scheduled(fixedRate = 8,timeUnit = TimeUnit.HOURS,zone = "Asia/Taipei")
@@ -161,7 +176,18 @@ public class StockService {
 		
 	}
 	
+	public Page<TWT84U> getFirstPageData(){
+		if(firstPageData == null) {
+            firstPageData = this.getStockByPage(0, 15);
+        }
+        return firstPageData;
+	}
+	
 	public Page<TWT84U> getStockByPageWithSort(int page, int size, @NotEmpty String columnName, String ascOrDesc){
+		if (page == 0 & size == 15 & columnName.equals("Code")&ascOrDesc.equals("asc")) {
+//			logger.debug("使用股票列表首頁快取");
+			return this.getFirstPageData();
+		}
 		if(!StringUtils.hasText(ascOrDesc)) {
 			ascOrDesc = "asc";//若這個參數有問題則預設給asc排序
 		}
