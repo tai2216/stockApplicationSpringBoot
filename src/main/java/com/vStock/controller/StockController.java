@@ -129,6 +129,18 @@ public class StockController {
 	}
 	
 	@RequestMapping(method = RequestMethod.GET
+			,value = "/getStockHoldingTotalLoss"
+			,produces = "application/json")
+	public ResponseEntity<GeneralResponse> getStockHoldingTotalLoss(@RequestParam(name = "userId") int userId) {
+		try {
+			return ResponseUtils.success("success", "查詢成功", stockService.getStockHoldingTotalLoss(userId));
+		} catch (Exception e) {
+			return ResponseUtils.error("failed", "資料發生錯誤", e);
+		}
+
+	}
+	
+	@RequestMapping(method = RequestMethod.GET
 			,value = "/getTransactionHistory"
 			,produces = "application/json")
 	public ResponseEntity<GeneralResponse> getTransactionHistory(

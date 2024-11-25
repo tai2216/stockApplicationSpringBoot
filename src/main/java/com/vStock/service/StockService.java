@@ -50,6 +50,7 @@ import com.vStock.dao.StockHoldingDao;
 import com.vStock.dao.StockHoldingDetailsDao;
 import com.vStock.dao.StockTransactionDao;
 import com.vStock.dao.Twt84uDao;
+import com.vStock.json.StockHoldingLoss;
 import com.vStock.model.MoneyAccount;
 import com.vStock.model.NormalUser;
 import com.vStock.model.StockHolding;
@@ -523,6 +524,22 @@ public class StockService {
 			e.printStackTrace();
 			return new HashMap<>();
 		}
+	}
+	
+	public StockHoldingLoss getStockHoldingTotalLoss(int userId) {
+		List<StockHolding> list = stockHoldingDao.findByFkUserId(userId).orElse(new ArrayList<>());
+		if(list.size()==0) {
+			return new StockHoldingLoss();
+		}
+		List<String> stockCodes = new ArrayList<>(list.size());
+		for(StockHolding obj:list) {
+			stockCodes.add(obj.getStockCode()); 
+		}
+		Map<String, String> currentPrice = this.getCurrentPrice(stockCodes.toArray(new String[stockCodes.size()]));
+		StockHoldingLoss loss = new StockHoldingLoss();
+		loss.setHoldingList(list);
+		loss.setStockNamesAndPrices(currentPrice);
+		return loss;
 	}
 	
 	/*
