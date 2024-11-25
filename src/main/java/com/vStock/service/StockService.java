@@ -103,7 +103,7 @@ public class StockService {
 	private String developerEmail;
 	
 	@Value("${getStockDataOnInit}")
-	private String getStockDataOnInit;
+	private boolean getStockDataOnInit;
 	
 	private String[] columnNameArray = {
 			"Code", "Name", "TodayLimitUp", "TodayOpeningRefPrice", "TodayLimitDown", "PreviousDayOpeningRefPrice",
@@ -131,7 +131,7 @@ public class StockService {
 	@Scheduled(fixedRate = 8,timeUnit = TimeUnit.HOURS,zone = "Asia/Taipei")
 	@Transactional(rollbackFor = Exception.class)
 	public void testSchedule() {
-		if("false".equals(getStockDataOnInit)) {//測試開發時使用，不須每次啟動都執行
+		if(!getStockDataOnInit) {//測試開發時使用，不須每次啟動都執行
 			logger.debug("排程測試今日已執行");
 			return;
 		}
@@ -580,10 +580,7 @@ public class StockService {
 	}
 	
 	private int countPage(int page) {
-		if(page==0) {
-			return 0;
-		}
-		return page*15;
+		return page==0 ? 0 : page*15;
 	}
 	
 
