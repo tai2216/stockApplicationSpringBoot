@@ -21,7 +21,7 @@ import io.jsonwebtoken.Jwts;
 
 public class JWTAuthenticationFilter extends BasicAuthenticationFilter{
 	
-	private static final Logger logger = LogManager.getLogger(JWTAuthentication.class);
+	private static final Logger logger = LogManager.getLogger(JWTAuthenticationFilter.class);
 	
 	private String jwtSecretKey;
 
@@ -59,7 +59,7 @@ public class JWTAuthenticationFilter extends BasicAuthenticationFilter{
 							.getBody()
 							.getSubject();
 			if (user != null) {
-				logger.debug("user!= null"+user.toString());
+				logger.debug("user!= null"+user);
 				return new UsernamePasswordAuthenticationToken(user, null, new ArrayList<>());
 			}else{
 				logger.error("JWTAuthenticationFilter:未找到該使用者");

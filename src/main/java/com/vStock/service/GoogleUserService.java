@@ -64,7 +64,7 @@ public class GoogleUserService {
 			ObjectMapper objectMapper = new ObjectMapper();
 			com.vStock.model.GoogleCredential credential = objectMapper.readValue(reqBody, GoogleCredential.class);
 //			logger.debug("google credential: "+credential.getCredential());
-			GoogleUser googleUser = verifyGoogleToken(credential.getCredential());
+			GoogleUser googleUser = this.verifyGoogleToken(credential.getCredential());
 			if(googleUser!=null) {
 				String token = Jwts.builder()
 						.setIssuer("Sam")
