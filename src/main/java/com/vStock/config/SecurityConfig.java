@@ -42,30 +42,30 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter{
 	@Override
 	protected void configure(HttpSecurity http) throws Exception {
 		try {
-			String jwtSecretkey = null;
+			String jwtSecretkey = "1234";
 			//啟動應用時可透過applictionProperties來決定要不要生成新的secret
-			if(getJwtSecretKeyOnInit) {
-				jwtSecretKeyDao.deleteAll();
-				jwtSecretKeyDao.flush();
-				jwtSecretkey = KeyUtils.generateKey(50, 200);
-				jwtSecretKeyDao.save(JwtSecretKey.builder().jwtKey(jwtSecretkey).build());
-				jwtSecretKeyDao.flush();
-			}else {
-				List<JwtSecretKey> list = jwtSecretKeyDao.findAll();
-				if(list.size()==0) {
-					jwtSecretkey = KeyUtils.generateKey(50, 200);
-					jwtSecretKeyDao.save(JwtSecretKey.builder().jwtKey(jwtSecretkey).build());
-					jwtSecretKeyDao.flush();
-				}else if(list.size()==1){
-					jwtSecretkey = jwtSecretKeyDao.findAll().get(0).getJwtKey();
-				}else{
-					jwtSecretKeyDao.deleteAll();
-					jwtSecretKeyDao.flush();
-					jwtSecretkey = KeyUtils.generateKey(50, 200);
-					jwtSecretKeyDao.save(JwtSecretKey.builder().jwtKey(jwtSecretkey).build());
-					jwtSecretKeyDao.flush();
-				}
-			}
+//			if(getJwtSecretKeyOnInit) {
+//				jwtSecretKeyDao.deleteAll();
+//				jwtSecretKeyDao.flush();
+//				jwtSecretkey = KeyUtils.generateKey(50, 200);
+//				jwtSecretKeyDao.save(JwtSecretKey.builder().jwtKey(jwtSecretkey).build());
+//				jwtSecretKeyDao.flush();
+//			}else {
+//				List<JwtSecretKey> list = jwtSecretKeyDao.findAll();
+//				if(list.size()==0) {
+//					jwtSecretkey = KeyUtils.generateKey(50, 200);
+//					jwtSecretKeyDao.save(JwtSecretKey.builder().jwtKey(jwtSecretkey).build());
+//					jwtSecretKeyDao.flush();
+//				}else if(list.size()==1){
+//					jwtSecretkey = jwtSecretKeyDao.findAll().get(0).getJwtKey();
+//				}else{
+//					jwtSecretKeyDao.deleteAll();
+//					jwtSecretKeyDao.flush();
+//					jwtSecretkey = KeyUtils.generateKey(50, 200);
+//					jwtSecretKeyDao.save(JwtSecretKey.builder().jwtKey(jwtSecretkey).build());
+//					jwtSecretKeyDao.flush();
+//				}
+//			}
 			googleUserService.setJwtSecretKey(jwtSecretkey);
 			http
 			.authorizeRequests()
@@ -76,7 +76,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter{
 //			.*: Matches any character (.) zero or more times (*).
 //			?: Makes the preceding group (\?.*) optional.
 //			.antMatchers("/login","/checkLogin","/oauth2/authorization/google","/register","/enableUser(\\?.*)?")
-			.regexMatchers("/login","/checkLogin","/register","/enableUser","/enableUser/(\\?.*)?","/googleLogin",
+			.regexMatchers("/test","/login","/checkLogin","/register","/enableUser","/enableUser/(\\?.*)?","/googleLogin",
 					"/forgotPassword.*","/resetPassword")
 			.permitAll()
 			.antMatchers("/css/**/**","/images/**/**","/js/**","/default/**","/layout/**","/img/**","/Message/**")
